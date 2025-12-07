@@ -314,6 +314,6 @@ Based on research from:
 ---
 
 **Repository:** https://forge.hpowr.com/chendrixson/ignition-timescaledb  
-**Maintained By:** Chris Hendrixson  
+**Maintained By:** Charlie Hendrixson  
 **Last Updated:** December 7, 2025  
 **Version:** 1.1.0
