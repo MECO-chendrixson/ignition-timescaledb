@@ -59,6 +59,7 @@ This documentation provides comprehensive guidance for integrating TimescaleDB w
 - [Continuous Aggregate Examples](docs/examples/02-continuous-aggregates.md) - Real-world aggregate configurations
 - [Scripting Examples](docs/examples/03-scripting-examples.md) - Python and Jython scripts
 - [ML Integration](docs/examples/04-ml-integration.md) - Machine learning workflows
+- [Data Migration](docs/examples/05-data-migration.md) - **NEW!** Migrate existing historian data to TimescaleDB
 
 ### Reference
 - [Table Schema Reference](docs/reference/01-table-schema.md) - Database table structures
