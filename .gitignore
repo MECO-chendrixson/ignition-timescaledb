@@ -1,0 +1,72 @@
+# Ignition TimescaleDB Integration - Git Ignore
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+
+# Logs
+*.log
+logs/
+*.out
+
+# Database files (if testing locally)
+*.db
+*.sqlite
+*.sql.backup
+
+# Credentials and secrets
+secrets/
+credentials/
+*.key
+*.pem
+.env
+.env.local
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Documentation build files
+docs/_build/
+docs/.doctrees/
+
+# Backup files
+*.backup
+backup/
+backups/
+
+# Test data
+test_data/
+sample_data/
+
+# Local configuration
+local_config/
+*.local
+
+# Node modules (if using any JS tools)
+node_modules/
+
+# Compiled output
+dist/
+build/
