@@ -1,8 +1,8 @@
 # Project Summary: Ignition + TimescaleDB Integration Documentation
 
 **Created:** December 7, 2025  
-**Version:** 1.0.0  
-**Status:** Ready for Repository Push
+**Version:** 1.1.0  
+**Status:** Published to forge.hpowr.com
 
 ## Overview
 
@@ -55,7 +55,7 @@ ignition-timescaledb/
     └── templates/                     # 📝 Configuration templates
 ```
 
-## Completed Documentation (14 Files, ~3,700 lines)
+## Completed Documentation (18 Files, ~6,200 lines)
 
 ### Core Documentation
 
@@ -129,13 +129,45 @@ ignition-timescaledb/
    - Permission grants
    - Usage examples
 
+### NEW in v1.1.0: ML Integration & Migration
+
+10. **ML Integration Guide** (04-ml-integration.md)
+    - Machine learning use cases
+    - Feature engineering with SQL
+    - Python connector for TimescaleDB
+    - Predictive maintenance examples
+    - Anomaly detection workflows
+    - LSTM forecasting
+    - Real-time prediction deployment
+
+11. **Data Migration Guide** (05-data-migration.md)
+    - Migration strategies (4 scenarios)
+    - Data quality validation
+    - Performance optimization
+    - ML training data preparation
+    - Zero-downtime migration
+
+12. **Migration Reference** (05-migration-reference.md)
+    - Quick migration commands
+    - Decision matrices
+    - Backfill strategies
+    - Validation queries
+
+13. **Python Migration Script** (migrate_historian_data.py)
+    - Complete automated migration tool
+    - Database connection management
+    - Batch processing with progress tracking
+    - Data validation
+    - Backup creation
+    - Command-line interface
+
 ### Project Files
 
-10. **LICENSE** - MIT License with third-party acknowledgments
-11. **CHANGELOG.md** - Version history
-12. **CONTRIBUTING.md** - Contribution guidelines
-13. **INDEX.md** - Complete documentation index
-14. **.gitignore** - Comprehensive ignore rules
+14. **LICENSE** - MIT License with third-party acknowledgments
+15. **CHANGELOG.md** - Version history (updated to v1.1.0)
+16. **CONTRIBUTING.md** - Contribution guidelines
+17. **INDEX.md** - Complete documentation index
+18. **.gitignore** - Comprehensive ignore rules
 
 ## Key Features
 
@@ -163,66 +195,60 @@ ignition-timescaledb/
 - Idempotent (safe to re-run)
 - Production-tested configurations
 
-### Code Statistics
-- **Total Lines:** ~3,700
-- **Documentation Files:** 11
+### Code Statistics (v1.1.0)
+- **Total Lines:** ~6,200
+- **Documentation Files:** 14
 - **SQL Scripts:** 3
-- **Markdown Files:** 11
+- **Python Scripts:** 1
+- **Markdown Files:** 14
 - **Configuration Files:** 3
 
 ## Git Repository Status
 
 ```
-Repository: Initialized
+Repository: Published to forge.hpowr.com
 Branch: main
-Initial Commit: Complete
-Status: Ready to push
+Remote: https://forge.hpowr.com/chendrixson/ignition-timescaledb.git
+Status: v1.1.0 committed and pushed
 
-Commit Details:
-- 14 files changed
-- 3,700+ insertions
-- Comprehensive commit message
+Commit History:
+1. Initial documentation (v1.0.0)
+2. Add ML integration and migration docs (v1.1.0)
+3. Update README and PROJECT_SUMMARY to v1.1.0
 ```
 
-## Next Steps
+## v1.1.0 New Features
 
-### Immediate
-1. Create repository on GitHub/GitLab
-2. Add remote origin
-3. Push initial commit
-4. Add repository description and topics
+### Machine Learning Integration
+- ✅ Complete ML workflow documentation
+- ✅ Python connector class for TimescaleDB
+- ✅ Predictive maintenance examples (Random Forest)
+- ✅ Anomaly detection (Isolation Forest)
+- ✅ Time series forecasting (LSTM)
+- ✅ Real-time prediction deployment to Ignition
+
+### Data Migration
+- ✅ Four migration strategies documented
+- ✅ Automated Python migration script
+- ✅ Data quality validation procedures
+- ✅ ML training data backfill guidance
+- ✅ Zero-downtime migration patterns
+- ✅ Rollback procedures
+
+## Next Steps
 
 ### Short-term Documentation
 - Configuration section (hypertable, compression, retention, aggregates)
 - Optimization guides (performance, queries, storage, scaling)
-- Examples section (queries, scripts, ML integration)
+- Additional examples (queries, scripts)
 - Reference section (schema, functions, API, best practices)
 
 ### Long-term Enhancements
-- Python/Jython example scripts
-- Machine learning workflow documentation
 - Backup and recovery procedures
 - High availability setup
 - Monitoring and alerting
 - Docker deployment examples
 - CI/CD integration examples
-
-## Repository Setup Commands
-
-After creating the repository on GitHub:
-
-```bash
-cd /home/chendrixson/projects/ignition-timescaledb
-
-# Add remote (replace with your repository URL)
-git remote add origin https://github.com/username/ignition-timescaledb.git
-
-# Verify remote
-git remote -v
-
-# Push to repository
-git push -u origin main
-```
 
 ## Usage
 
@@ -287,16 +313,7 @@ Based on research from:
 
 ---
 
-**Project Ready for Repository Push**
-
-When you've created the remote repository, run:
-```bash
-git remote add origin <your-repo-url>
-git push -u origin main
-```
-
----
-
+**Repository:** https://forge.hpowr.com/chendrixson/ignition-timescaledb  
 **Maintained By:** Chris Hendrixson  
 **Last Updated:** December 7, 2025  
-**Version:** 1.0.0
+**Version:** 1.1.0

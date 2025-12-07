@@ -1,6 +1,6 @@
 # Ignition SCADA + TimescaleDB Integration Guide
 
-**Version:** 1.0  
+**Version:** 1.1.0  
 **Last Updated:** December 7, 2025  
 **Compatible with:** Ignition 8.3.2+ and TimescaleDB 2.x
 
@@ -129,5 +129,5 @@ This documentation is provided as-is for educational and reference purposes.
 ---
 
 **Last Review:** December 7, 2025  
-**Document Version:** 1.0  
+**Document Version:** 1.1.0  
 **Maintained By:** Project Team
