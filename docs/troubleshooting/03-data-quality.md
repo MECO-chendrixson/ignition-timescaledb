@@ -1,143 +1,240 @@
-# 03 data quality
+# Data Quality Troubleshooting
 
 **Last Updated:** December 8, 2025  
-**Difficulty:** Intermediate to Advanced  
+**Difficulty:** Intermediate
 
 ## Overview
 
-Troubleshooting guide for 03 data quality in TimescaleDB with Ignition.
+Guide for identifying and resolving data quality issues in Ignition historian with TimescaleDB.
 
-## Common Issues
+---
 
-### Slow Query Performance
+## Missing Data
 
-**Symptoms:**
-- Queries taking >5 seconds
-- High CPU usage
-- Timeouts in Ignition
+### Detection
 
-**Diagnosis:**
+**Check for data gaps:**
 ```sql
--- Check query performance
-EXPLAIN ANALYZE
-SELECT * FROM sqlth_1_data 
-WHERE t_stamp >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '1 day') * 1000);
+-- Find hours with missing data
+WITH hourly_counts AS (
+    SELECT 
+        time_bucket(3600000, t_stamp) as hour,
+        COUNT(*) as sample_count
+    FROM sqlth_1_data
+    WHERE tagid = 100
+      AND t_stamp >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '7 days') * 1000)
+    GROUP BY hour
+)
+SELECT 
+    to_timestamp(hour/1000) as hour,
+    sample_count,
+    CASE 
+        WHEN sample_count < 3000 THEN 'Missing data'
+        ELSE 'OK'
+    END as status
+FROM hourly_counts
+WHERE sample_count < 3000
+ORDER BY hour DESC;
 ```
 
-**Solutions:**
-✅ Add indexes on t_stamp and tagid
-✅ Enable compression for old data
-✅ Use continuous aggregates
-✅ Increase work_mem in PostgreSQL
+### Causes
 
-### Missing Data
+1. **Ignition Gateway down**
+2. **Tag not enabled for history**
+3. **Bad quality data (filtered out)**
+4. **Network issues**
+5. **Database connection failure**
 
-**Check for gaps:**
+### Solutions
+
+**1. Check Ignition store and forward:**
+- Gateway → Config → System → Store and Forward
+- Check for quarantined data
+- Check for backlogs
+
+**2. Verify tag configuration:**
+```python
+# In Ignition Designer
+tagConfig = system.tag.getConfiguration('[default]Production/Temperature')[0]
+print tagConfig['historyEnabled']
+print tagConfig['historicalTagProvider']
+```
+
+**3. Backfill missing data (if source available):**
 ```sql
+-- Import from backup or another source
+INSERT INTO sqlth_1_data (tagid, floatvalue, dataintegrity, t_stamp)
+SELECT tagid, floatvalue, 192, t_stamp
+FROM backup_table
+WHERE t_stamp NOT IN (SELECT t_stamp FROM sqlth_1_data WHERE tagid = backup_table.tagid);
+```
+
+---
+
+## Duplicate Records
+
+### Detection
+
+```sql
+-- Find duplicates
 SELECT 
-    time_bucket(3600000, t_stamp) as hour,
-    COUNT(*) as samples
+    tagid,
+    t_stamp,
+    COUNT(*) as duplicate_count,
+    ARRAY_AGG(COALESCE(intvalue, floatvalue)) as values
 FROM sqlth_1_data
-WHERE tagid = 100
-  AND t_stamp >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '7 days') * 1000)
-GROUP BY hour
-HAVING COUNT(*) < 3600;  -- Less than expected samples
+WHERE t_stamp >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '1 day') * 1000)
+GROUP BY tagid, t_stamp
+HAVING COUNT(*) > 1
+ORDER BY duplicate_count DESC;
 ```
 
-### Data Quality Issues
+### Removal
 
-**Check quality distribution:**
+```sql
+-- Delete duplicates, keeping first record
+DELETE FROM sqlth_1_data a USING (
+    SELECT MIN(ctid) as ctid, tagid, t_stamp
+    FROM sqlth_1_data
+    GROUP BY tagid, t_stamp
+    HAVING COUNT(*) > 1
+) b
+WHERE a.tagid = b.tagid 
+  AND a.t_stamp = b.t_stamp 
+  AND a.ctid <> b.ctid;
+```
+
+---
+
+## Incorrect Timestamps
+
+### Detection
+
+```sql
+-- Find future timestamps
+SELECT 
+    tagid,
+    t_stamp,
+    to_timestamp(t_stamp/1000) as timestamp_human,
+    CASE 
+        WHEN t_stamp > (EXTRACT(EPOCH FROM NOW() + INTERVAL '1 day') * 1000) 
+            THEN 'FUTURE'
+        WHEN t_stamp < (EXTRACT(EPOCH FROM '2000-01-01'::timestamp) * 1000)
+            THEN 'TOO OLD'
+        ELSE 'OK'
+    END as timestamp_status
+FROM sqlth_1_data
+WHERE t_stamp > (EXTRACT(EPOCH FROM NOW() + INTERVAL '1 day') * 1000)
+   OR t_stamp < (EXTRACT(EPOCH FROM '2000-01-01'::timestamp) * 1000)
+LIMIT 100;
+```
+
+### Causes
+
+1. **System clock drift** on Ignition gateway
+2. **Timezone issues** in configuration
+3. **Millisecond vs second confusion**
+4. **Manual data entry errors**
+
+### Solutions
+
+**1. Fix system clock:**
+```bash
+# Linux - sync time
+sudo ntpdate pool.ntp.org
+sudo timedatectl set-ntp true
+
+# Windows - sync time
+w32tm /resync
+```
+
+**2. Delete invalid timestamps:**
+```sql
+-- Delete future timestamps
+DELETE FROM sqlth_1_data
+WHERE t_stamp > (EXTRACT(EPOCH FROM NOW() + INTERVAL '1 hour') * 1000);
+
+-- Delete ancient timestamps (before year 2000)
+DELETE FROM sqlth_1_data
+WHERE t_stamp < (EXTRACT(EPOCH FROM '2000-01-01'::timestamp) * 1000);
+```
+
+---
+
+## Data Quality Codes
+
+### Quality Distribution Analysis
+
 ```sql
 SELECT 
-    dataintegrity,
+    dataintegrity as quality_code,
+    CASE dataintegrity
+        WHEN 192 THEN 'Good'
+        WHEN 0 THEN 'Bad'
+        WHEN 8 THEN 'Bad_OutOfRange'
+        WHEN 64 THEN 'Bad_Stale'
+        WHEN 12 THEN 'Bad_DeviceFailure'
+        ELSE 'Unknown (' || dataintegrity || ')'
+    END as quality_name,
     COUNT(*) as count,
-    ROUND(COUNT(*)::numeric / SUM(COUNT(*)) OVER() * 100, 2) as percentage
+    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) as percentage
 FROM sqlth_1_data
 WHERE t_stamp >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '1 day') * 1000)
 GROUP BY dataintegrity
 ORDER BY count DESC;
 ```
 
-## Diagnostic Queries
+### Filter Bad Quality
 
-### Check Chunk Health
 ```sql
-SELECT 
-    chunk_name,
-    is_compressed,
-    pg_size_pretty(total_bytes) as size
-FROM timescaledb_information.chunks
-WHERE hypertable_name = 'sqlth_1_data'
-ORDER BY range_start DESC
-LIMIT 10;
+-- Query only good quality data
+SELECT * FROM sqlth_1_data
+WHERE dataintegrity = 192  -- Good quality
+  AND t_stamp >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '1 hour') * 1000);
 ```
 
-### Check Active Connections
+---
+
+## Data Integrity Checks
+
+### Comprehensive Quality Report
+
 ```sql
+WITH quality_stats AS (
+    SELECT 
+        t.tagpath,
+        COUNT(*) as total_samples,
+        COUNT(*) FILTER (WHERE d.dataintegrity = 192) as good_samples,
+        COUNT(*) FILTER (WHERE d.dataintegrity != 192) as bad_samples,
+        MIN(to_timestamp(d.t_stamp/1000)) as first_sample,
+        MAX(to_timestamp(d.t_stamp/1000)) as last_sample
+    FROM sqlth_1_data d
+    JOIN sqlth_te t ON d.tagid = t.id
+    WHERE d.t_stamp >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '7 days') * 1000)
+    GROUP BY t.tagpath
+)
 SELECT 
-    datname,
-    usename,
-    state,
-    COUNT(*)
-FROM pg_stat_activity
-WHERE datname = 'historian'
-GROUP BY datname, usename, state;
+    tagpath,
+    total_samples,
+    good_samples,
+    bad_samples,
+    ROUND(100.0 * good_samples / total_samples, 2) as good_pct,
+    last_sample,
+    NOW() - last_sample as time_since_update
+FROM quality_stats
+WHERE bad_samples > 100  -- Only show tags with quality issues
+ORDER BY bad_samples DESC;
 ```
 
-### Check Table Bloat
-```sql
-SELECT 
-    schemaname,
-    tablename,
-    pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size
-FROM pg_tables
-WHERE tablename LIKE 'sqlth%'
-ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
-```
+---
 
-## Monitoring Tools
+## Best Practices
 
-### pgAdmin
-- Query Tool for interactive queries
-- Server monitoring dashboard
-- Query history and explain plans
-
-### psql Commands
-```bash
-# Check database size
-psql -U postgres -d historian -c "SELECT pg_size_pretty(pg_database_size('historian'));"
-
-# List tables
-psql -U postgres -d historian -c "\dt sqlth*"
-
-# Check compression status
-psql -U postgres -d historian -c "SELECT * FROM timescaledb_information.compressed_chunk_stats;"
-```
-
-## Performance Monitoring
-
-### Track Query Performance
-```sql
--- Enable query logging
-ALTER DATABASE historian SET log_min_duration_statement = 1000; -- Log queries >1s
-
--- View slow queries
-SELECT 
-    query,
-    calls,
-    total_time,
-    mean_time,
-    max_time
-FROM pg_stat_statements
-ORDER BY mean_time DESC
-LIMIT 20;
-```
-
-## Next Steps
-
-- [Common Issues](01-common-issues.md)
-- [Performance Tuning](../optimization/01-performance-tuning.md)
-- [Query Optimization](../optimization/02-query-optimization.md)
+✅ Monitor data quality metrics  
+✅ Filter by quality code in queries  
+✅ Investigate spikes in bad quality  
+✅ Set up alerts for missing data  
+✅ Regular data integrity checks  
 
 ---
 

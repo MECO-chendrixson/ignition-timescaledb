@@ -1,75 +1,143 @@
-# 04 best practices
+# Best Practices
 
 **Last Updated:** December 8, 2025  
-**Difficulty:** Reference  
+**Difficulty:** Reference
 
 ## Overview
 
-Comprehensive reference for 04 best practices.
+Consolidated best practices for TimescaleDB with Ignition SCADA historian.
 
-## Ignition Historian Tables
+---
 
-### sqlth_1_data (Main Data Table)
+## Schema Design
 
-| Column | Type | Description |
-|--------|------|-------------|
-| tagid | INTEGER | Foreign key to sqlth_te |
-| intvalue | INTEGER | Integer tag values |
-| floatvalue | DOUBLE PRECISION | Float tag values |
-| stringvalue | TEXT | String tag values |
-| datevalue | TIMESTAMP | Date tag values |
-| dataintegrity | INTEGER | Quality code (192 = good) |
-| t_stamp | BIGINT | Unix timestamp in milliseconds |
+### Hypertable Configuration
 
-### sqlth_te (Tag Metadata)
+✅ **DO:**
+- Use 24-hour chunks for standard workloads
+- Enable compression after 7 days
+- Set retention policies appropriate for compliance
+- Use BRIN indexes on timestamp columns
+- Disable Ignition partitioning when using TimescaleDB
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | SERIAL | Tag ID (primary key) |
-| tagpath | VARCHAR | Full tag path |
-| datatype | INTEGER | Data type (1=int, 2=float, etc) |
-| created | BIGINT | Creation timestamp |
-| retired | BIGINT | Retirement timestamp (NULL if active) |
+❌ **DON'T:**
+- Don't enable both Ignition AND TimescaleDB partitioning
+- Don't make chunks too small (<10MB) or too large (>1GB)
+- Don't compress data that needs frequent updates
+- Don't skip the integer now function setup
 
-## TimescaleDB Functions
+---
 
-### time_bucket()
+## Compression
+
+### Configuration
+
+✅ **DO:**
+- Segment by tagid for tag-specific queries
+- Order by t_stamp DESC for recent data access
+- Compress after data stabilizes (7-14 days)
+- Monitor compression ratios (target: 10x+)
+- Use compression policies for automation
+
+❌ **DON'T:**
+- Don't compress recent data (<7 days)
+- Don't use too many segment_by columns (max 3)
+- Don't skip compression (wastes 90% storage)
+
+---
+
+## Query Optimization
+
+### Performance
+
+✅ **DO:**
+- Always filter on t_stamp first
+- Use time_bucket for aggregations
+- Use continuous aggregates for historical queries
+- Select only needed columns
+- Use prepared statements
+- Cache tagid lookups
+
+❌ **DON'T:**
+- Don't use SELECT *
+- Don't use functions on indexed columns in WHERE
+- Don't use OR for multiple values (use IN/ANY)
+- Don't aggregate raw data for historical queries
+
+---
+
+## Maintenance
+
+### Regular Tasks
+
+**Daily:**
+- Monitor database size
+- Check compression status
+- Verify data freshness
+- Review slow queries
+
+**Weekly:**
+- Run ANALYZE on main tables
+- Check autovacuum status
+- Review retention policy execution
+- Backup databases
+
+**Monthly:**
+- VACUUM metadata tables
+- Review and optimize indexes
+- Capacity planning review
+- Check for unused indexes
+
+---
+
+## Security
+
+### Access Control
+
+✅ **DO:**
+- Use least privilege principle
+- Separate users for read vs write
+- Enable SSL/TLS connections
+- Use .pgpass for password management
+- Regular password rotation
+
 ```sql
-SELECT time_bucket('1 hour', t_stamp) as hour, 
-       AVG(floatvalue) 
-FROM sqlth_1_data 
-GROUP BY hour;
+-- Create read-only user
+CREATE ROLE reporter LOGIN PASSWORD 'secure_pass';
+GRANT CONNECT ON DATABASE historian TO reporter;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO reporter;
 ```
 
-### compress_chunk()
-```sql
-SELECT compress_chunk(chunk_name) 
-FROM show_chunks('sqlth_1_data');
+---
+
+## Backup and Recovery
+
+### Strategy
+
+✅ **3-2-1 Rule:**
+- 3 copies of data
+- 2 different storage types
+- 1 off-site backup
+
+**Automated backups:**
+```bash
+# Daily backup script
+0 2 * * * /path/to/scripts/maintenance/backup_historian.sh
 ```
 
-## Ignition Scripting Functions
+---
 
-### system.tag.queryTagHistory()
-```python
-# Query tag history
-results = system.tag.queryTagHistory(
-    paths=['[default]Production/Temperature'],
-    startDate=system.date.addHours(system.date.now(), -24),
-    endDate=system.date.now(),
-    returnSize=1000,
-    aggregationMode='Average',
-    returnFormat='Wide'
-)
-```
+## Monitoring
 
-## Best Practices
+### Key Metrics
 
-✅ **Use time_bucket for aggregations**
-✅ **Filter by t_stamp for performance**
-✅ **Enable compression after 7 days**
-✅ **Use continuous aggregates for historical queries**
-✅ **Set appropriate retention policies**
-✅ **Regular maintenance (VACUUM, ANALYZE)**
+Track these metrics:
+- Database size and growth rate
+- Compression ratio
+- Cache hit ratio (>99%)
+- Query performance (p95, p99)
+- Connection count
+- Replication lag (if applicable)
 
 ---
 

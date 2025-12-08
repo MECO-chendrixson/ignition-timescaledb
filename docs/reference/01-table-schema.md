@@ -1,75 +1,121 @@
-# 01 table schema
+# Table Schema Reference
 
 **Last Updated:** December 8, 2025  
-**Difficulty:** Reference  
+**Difficulty:** Reference
 
 ## Overview
 
-Comprehensive reference for 01 table schema.
+Complete reference for Ignition SQL Tag Historian table schemas in PostgreSQL/TimescaleDB.
 
-## Ignition Historian Tables
+---
 
-### sqlth_1_data (Main Data Table)
+## Core Data Tables
+
+### sqlth_1_data
+
+Main historical data storage table (becomes hypertable).
+
+```sql
+\d sqlth_1_data
+```
 
 | Column | Type | Description |
 |--------|------|-------------|
-| tagid | INTEGER | Foreign key to sqlth_te |
-| intvalue | INTEGER | Integer tag values |
-| floatvalue | DOUBLE PRECISION | Float tag values |
-| stringvalue | TEXT | String tag values |
-| datevalue | TIMESTAMP | Date tag values |
-| dataintegrity | INTEGER | Quality code (192 = good) |
-| t_stamp | BIGINT | Unix timestamp in milliseconds |
+| `tagid` | INTEGER | Foreign key to sqlth_te.id |
+| `intvalue` | INTEGER | Integer tag values |
+| `floatvalue` | DOUBLE PRECISION | Floating point tag values |
+| `stringvalue` | TEXT | String tag values |
+| `datevalue` | TIMESTAMP | Date/time tag values |
+| `dataintegrity` | INTEGER | Quality code (0-255) |
+| `t_stamp` | BIGINT | Unix timestamp in milliseconds |
+
+**Indexes:**
+- Primary key: None (hypertable partitioned by t_stamp)
+- `idx_sqlth_data_tstamp_brin` - BRIN index on t_stamp
+- `idx_sqlth_data_tagid_tstamp` - B-tree on (tagid, t_stamp DESC)
+
+**Storage:**
+- One row per tag value change
+- Only one value column populated per row (based on tag datatype)
+- Typical row size: 32-48 bytes
+
+---
 
 ### sqlth_te (Tag Metadata)
 
+Tag configuration and metadata.
+
 | Column | Type | Description |
 |--------|------|-------------|
-| id | SERIAL | Tag ID (primary key) |
-| tagpath | VARCHAR | Full tag path |
-| datatype | INTEGER | Data type (1=int, 2=float, etc) |
-| created | BIGINT | Creation timestamp |
-| retired | BIGINT | Retirement timestamp (NULL if active) |
+| `id` | SERIAL | Primary key, tag ID |
+| `tagpath` | VARCHAR(512) | Full tag path |
+| `datatype` | INTEGER | Data type (1=int, 2=float, 3=string, 4=date) |
+| `scid` | INTEGER | Scan class ID |
+| `created` | BIGINT | Creation timestamp |
+| `retired` | BIGINT | Retirement timestamp (NULL if active) |
 
-## TimescaleDB Functions
+**Indexes:**
+- Primary key on `id`
+- Unique index on `tagpath` WHERE retired IS NULL
 
-### time_bucket()
+---
+
+## Quality Codes (dataintegrity)
+
+| Code | Name | Description |
+|------|------|-------------|
+| 192 | Good | Normal, good quality data |
+| 0 | Bad | Generic bad quality |
+| 8 | Bad_OutOfRange | Value outside configured range |
+| 64 | Bad_Stale | Data hasn't updated recently |
+| 12 | Bad_DeviceFailure | Device or connection failure |
+
+---
+
+## Metadata Tables
+
+### sqlth_partitions
+
+Partition configuration for historian.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `partitionid` | SERIAL | Primary key |
+| `pname` | VARCHAR(255) | Partition name |
+| `start_time` | BIGINT | Partition start timestamp |
+| `end_time` | BIGINT | Partition end timestamp |
+
+### sqlth_drv
+
+Driver information.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | SERIAL | Primary key |
+| `drvpath` | VARCHAR(255) | Driver path/name |
+| `created` | BIGINT | Creation timestamp |
+
+---
+
+## Query Examples
+
+### Get Tag Schema
 ```sql
-SELECT time_bucket('1 hour', t_stamp) as hour, 
-       AVG(floatvalue) 
-FROM sqlth_1_data 
-GROUP BY hour;
+SELECT column_name, data_type, is_nullable
+FROM information_schema.columns
+WHERE table_name = 'sqlth_1_data'
+ORDER BY ordinal_position;
 ```
 
-### compress_chunk()
+### Check Table Sizes
 ```sql
-SELECT compress_chunk(chunk_name) 
-FROM show_chunks('sqlth_1_data');
+SELECT 
+    tablename,
+    pg_size_pretty(pg_total_relation_size(tablename::regclass)) as total_size,
+    pg_size_pretty(pg_relation_size(tablename::regclass)) as table_size
+FROM pg_tables
+WHERE schemaname = 'public' AND tablename LIKE 'sqlth%';
 ```
-
-## Ignition Scripting Functions
-
-### system.tag.queryTagHistory()
-```python
-# Query tag history
-results = system.tag.queryTagHistory(
-    paths=['[default]Production/Temperature'],
-    startDate=system.date.addHours(system.date.now(), -24),
-    endDate=system.date.now(),
-    returnSize=1000,
-    aggregationMode='Average',
-    returnFormat='Wide'
-)
-```
-
-## Best Practices
-
-✅ **Use time_bucket for aggregations**
-✅ **Filter by t_stamp for performance**
-✅ **Enable compression after 7 days**
-✅ **Use continuous aggregates for historical queries**
-✅ **Set appropriate retention policies**
-✅ **Regular maintenance (VACUUM, ANALYZE)**
 
 ---
 
