@@ -256,21 +256,23 @@ ALTER TABLE sqlth_1_data SET (
 After enabling compression, create a policy to automatically compress old chunks:
 
 ```sql
--- Compress chunks older than 7 days
-SELECT add_compression_policy('sqlth_1_data', compress_after => INTERVAL '7 days');
+-- Compress chunks older than 7 days (7 days in milliseconds)
+SELECT add_compression_policy('sqlth_1_data', compress_after => 604800000);
 ```
 
 **This creates a background job that:**
 - Runs periodically (default: every 12 hours)
-- Finds chunks older than 7 days (calculated as `now - 7 days`)
+- Finds chunks older than 7 days (604800000 milliseconds = 7 days)
 - Compresses them automatically
 - Requires no manual intervention
 
-**Alternative:** Compress by chunk creation time instead of data age:
-```sql
--- Compress chunks created more than 7 days ago
-SELECT add_compression_policy('sqlth_1_data', compress_created_before => INTERVAL '7 days');
-```
+**Common compression intervals:**
+- 7 days: `604800000` milliseconds
+- 14 days: `1209600000` milliseconds
+- 30 days: `2592000000` milliseconds
+- 90 days: `7776000000` milliseconds
+
+**Note:** Because the time column is BIGINT (milliseconds since epoch), compression intervals must be specified as integers in milliseconds, not INTERVAL types.
 
 ### View Compression Settings
 
