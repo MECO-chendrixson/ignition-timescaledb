@@ -162,8 +162,9 @@ An automated background job that compresses chunks older than a specified age.
 ### Adding a Compression Policy
 
 ```sql
--- Compress chunks older than 7 days
-SELECT add_compression_policy('sqlth_1_data', INTERVAL '7 days');
+-- Compress chunks older than 7 days (604800000 milliseconds = 7 days)
+-- For BIGINT time columns, must use BIGINT type casting
+SELECT add_compression_policy('sqlth_1_data', BIGINT '604800000');
 ```
 
 **Why 7 days?**
@@ -174,14 +175,14 @@ SELECT add_compression_policy('sqlth_1_data', INTERVAL '7 days');
 **Alternative schedules:**
 
 ```sql
--- Conservative: Compress after 14 days
-SELECT add_compression_policy('sqlth_1_data', INTERVAL '14 days');
+-- Conservative: Compress after 14 days (1209600000 ms)
+SELECT add_compression_policy('sqlth_1_data', BIGINT '1209600000');
 
--- Aggressive: Compress after 3 days
-SELECT add_compression_policy('sqlth_1_data', INTERVAL '3 days');
+-- Aggressive: Compress after 3 days (259200000 ms)
+SELECT add_compression_policy('sqlth_1_data', BIGINT '259200000');
 
--- Immediate: Compress after 1 day (only if data never changes)
-SELECT add_compression_policy('sqlth_1_data', INTERVAL '1 day');
+-- Immediate: Compress after 1 day (86400000 ms - only if data never changes)
+SELECT add_compression_policy('sqlth_1_data', BIGINT '86400000');
 ```
 
 ### Policy Scheduling
