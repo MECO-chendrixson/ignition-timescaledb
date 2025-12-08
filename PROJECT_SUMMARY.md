@@ -1,7 +1,7 @@
 # Project Summary: Ignition + TimescaleDB Integration Documentation
 
 **Created:** December 7, 2025  
-**Version:** 1.1.0  
+**Version:** 1.2.0  
 **Status:** Published to forge.hpowr.com
 
 ## Overview
@@ -314,6 +314,6 @@ Based on research from:
 ---
 
 **Repository:** https://forge.hpowr.com/chendrixson/ignition-timescaledb  
-**Maintained By:** Charlie Hendrixson  
-**Last Updated:** December 7, 2025  
-**Version:** 1.1.0
+**Maintained By:** Miller-Eads Automation  
+**Last Updated:** December 8, 2025  
+**Version:** 1.2.0

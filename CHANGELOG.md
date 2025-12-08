@@ -96,7 +96,7 @@ All notable changes to this documentation project will be documented in this fil
 
 - Updated README.md to highlight Quick Reference guide
 - Updated INDEX.md to include Quick Reference document
-- Corrected author name from Chris to Charlie Hendrixson in PROJECT_SUMMARY.md
+- Updated maintainer information to Miller-Eads Automation
 - Updated version to 1.2.0 across documentation
 
 ## [Unreleased]
