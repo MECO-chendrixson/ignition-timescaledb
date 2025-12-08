@@ -2,11 +2,12 @@
 -- Continuous Aggregates for Ignition Tag History
 -- ============================================================================
 -- Description: Creates hierarchical continuous aggregates for multi-resolution data
--- Version: 1.0
--- Last Updated: 2025-12-07
+-- Version: 1.3.0
+-- Last Updated: 2025-12-08
 -- Prerequisites: 
 --   - Hypertables configured
 --   - Data being collected in sqlth_1_data
+-- Maintained by: Miller-Eads Automation
 -- ============================================================================
 
 -- Usage: psql -U postgres -d historian -f 03-continuous-aggregates.sql

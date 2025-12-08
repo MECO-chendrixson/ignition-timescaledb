@@ -2,6 +2,10 @@
 
 This directory contains scripts for migrating historical data to TimescaleDB.
 
+**Version:** 1.3.0  
+**Last Updated:** December 8, 2025  
+**Maintained by:** Miller-Eads Automation
+
 ## Available Scripts
 
 ### migrate_historian_data.py
@@ -184,4 +188,5 @@ SELECT migrate_time_range('2024-01-01'::timestamp, '2024-12-31'::timestamp);
 - [Data Migration Documentation](../../docs/examples/05-data-migration.md)
 - [ML Integration Guide](../../docs/examples/04-ml-integration.md)
 
-**Last Updated:** December 7, 2025
+**Last Updated:** December 8, 2025  
+**Maintained by:** Miller-Eads Automation

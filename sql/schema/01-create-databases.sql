@@ -2,9 +2,10 @@
 -- Ignition + TimescaleDB Database Setup Script
 -- ============================================================================
 -- Description: Creates databases and users for Ignition SCADA integration
--- Version: 1.0
--- Last Updated: 2025-12-07
+-- Version: 1.3.0
+-- Last Updated: 2025-12-08
 -- Compatible with: PostgreSQL 12+, TimescaleDB 2.0+
+-- Maintained by: Miller-Eads Automation
 -- ============================================================================
 
 -- Note: Run this script as the postgres superuser

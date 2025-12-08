@@ -2,11 +2,12 @@
 -- TimescaleDB Hypertable Configuration for Ignition
 -- ============================================================================
 -- Description: Converts Ignition historian tables to TimescaleDB hypertables
--- Version: 1.0
--- Last Updated: 2025-12-07
+-- Version: 1.3.0
+-- Last Updated: 2025-12-08
 -- Prerequisites: 
 --   - Ignition has created sqlth_1_data table
 --   - TimescaleDB extension enabled
+-- Maintained by: Miller-Eads Automation
 -- ============================================================================
 
 -- IMPORTANT: Wait for Ignition to create the sqlth_1_data table before running!
