@@ -257,28 +257,20 @@ After enabling compression, create a policy to automatically compress old chunks
 
 ```sql
 -- Compress chunks older than 7 days
-SELECT add_compression_policy('sqlth_1_data', INTERVAL '7 days');
+SELECT add_compression_policy('sqlth_1_data', compress_after => INTERVAL '7 days');
 ```
 
 **This creates a background job that:**
-- Runs periodically (default: every 4 hours)
-- Finds chunks older than 7 days
+- Runs periodically (default: every 12 hours)
+- Finds chunks older than 7 days (calculated as `now - 7 days`)
 - Compresses them automatically
 - Requires no manual intervention
 
-**⚠️ Common Mistake to Avoid:**
-
-Do NOT use `timescaledb.compress_after` - this parameter does not exist and will cause an error:
+**Alternative:** Compress by chunk creation time instead of data age:
 ```sql
--- ❌ WRONG - This will fail!
-ALTER TABLE sqlth_1_data SET (
-    timescaledb.compress_after = '7 days'  -- Invalid parameter!
-);
+-- Compress chunks created more than 7 days ago
+SELECT add_compression_policy('sqlth_1_data', compress_created_before => INTERVAL '7 days');
 ```
-
-**✅ Correct approach:**
-1. First, enable compression with `ALTER TABLE SET (timescaledb.compress, ...)`
-2. Then, add compression policy with `add_compression_policy()` function
 
 ### View Compression Settings
 
