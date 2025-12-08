@@ -95,7 +95,7 @@ A **continuous aggregate** is a materialized view that:
 ### Time Bucket Concept
 
 ```sql
-time_bucket('1 hour', t_stamp)
+time_bucket(3600000, t_stamp)
 ```
 
 **What it does:**
@@ -105,7 +105,7 @@ time_bucket('1 hour', t_stamp)
 
 **Example:**
 ```
-Timestamps:         time_bucket('1 hour', t_stamp):
+Timestamps:         time_bucket(3600000, t_stamp):
 10:15:23  ───────►  10:00:00
 10:42:17  ───────►  10:00:00
 11:05:44  ───────►  11:00:00
@@ -194,7 +194,7 @@ For learning or custom configurations, create aggregates manually.
 CREATE MATERIALIZED VIEW tag_history_1min
 WITH (timescaledb.continuous) AS
 SELECT
-    time_bucket('1 minute', t_stamp) AS bucket,
+    time_bucket(60000, t_stamp) AS bucket,
     tagid,
     AVG(COALESCE(intvalue, floatvalue)) AS avg_value,
     MAX(COALESCE(intvalue, floatvalue)) AS max_value,
@@ -210,7 +210,7 @@ GROUP BY bucket, tagid;
 
 **Key components:**
 
-- **`time_bucket('1 minute', t_stamp)`** - Groups data into 1-minute intervals
+- **`time_bucket(60000, t_stamp)`** - Groups data into 1-minute intervals
 - **`COALESCE(intvalue, floatvalue)`** - Handles both integer and float values
 - **`WHERE dataintegrity = 192`** - Filters to good quality only (configurable)
 - **`GROUP BY bucket, tagid`** - Aggregates per tag per minute
@@ -220,8 +220,8 @@ GROUP BY bucket, tagid;
 ```sql
 -- Refresh every 5 minutes for data from last hour
 SELECT add_continuous_aggregate_policy('tag_history_1min',
-    start_offset => INTERVAL '1 hour',
-    end_offset => INTERVAL '1 minute',
+    start_offset => 3600000,
+    end_offset => 60000,
     schedule_interval => INTERVAL '5 minutes'
 );
 ```
@@ -241,7 +241,7 @@ SELECT add_continuous_aggregate_policy('tag_history_1min',
 
 ```sql
 -- Keep 1-minute aggregates for 1 year
-SELECT add_retention_policy('tag_history_1min', INTERVAL '1 year');
+SELECT add_retention_policy('tag_history_1min', drop_after => BIGINT '31536000000');
 ```
 
 #### Step 4: Create Hourly Aggregate (Hierarchical)
@@ -251,7 +251,7 @@ SELECT add_retention_policy('tag_history_1min', INTERVAL '1 year');
 CREATE MATERIALIZED VIEW tag_history_1hour
 WITH (timescaledb.continuous) AS
 SELECT
-    time_bucket('1 hour', bucket) AS bucket,
+    time_bucket(3600000, bucket) AS bucket,
     tagid,
     AVG(avg_value) AS avg_value,
     MAX(max_value) AS max_value,
@@ -270,13 +270,13 @@ GROUP BY bucket, tagid;
 ```sql
 -- Refresh hourly for data from last 3 days
 SELECT add_continuous_aggregate_policy('tag_history_1hour',
-    start_offset => INTERVAL '3 days',
-    end_offset => INTERVAL '1 hour',
+    start_offset => 259200000,
+    end_offset => 3600000,
     schedule_interval => INTERVAL '1 hour'
 );
 
 -- Keep hourly data for 5 years
-SELECT add_retention_policy('tag_history_1hour', INTERVAL '5 years');
+SELECT add_retention_policy('tag_history_1hour', drop_after => BIGINT '157680000000');
 ```
 
 #### Step 6: Create Daily Aggregate
@@ -286,7 +286,7 @@ SELECT add_retention_policy('tag_history_1hour', INTERVAL '5 years');
 CREATE MATERIALIZED VIEW tag_history_1day
 WITH (timescaledb.continuous) AS
 SELECT
-    time_bucket('1 day', bucket) AS bucket,
+    time_bucket(86400000, bucket) AS bucket,
     tagid,
     AVG(avg_value) AS avg_value,
     MAX(max_value) AS max_value,
@@ -301,13 +301,13 @@ GROUP BY bucket, tagid;
 ```sql
 -- Refresh daily for data from last week
 SELECT add_continuous_aggregate_policy('tag_history_1day',
-    start_offset => INTERVAL '7 days',
-    end_offset => INTERVAL '1 day',
+    start_offset => 604800000,
+    end_offset => 86400000,
     schedule_interval => INTERVAL '1 day'
 );
 
 -- Keep daily data for 10 years
-SELECT add_retention_policy('tag_history_1day', INTERVAL '10 years');
+SELECT add_retention_policy('tag_history_1day', drop_after => BIGINT '315360000000');
 ```
 
 ---
@@ -322,7 +322,7 @@ For long-term trending:
 CREATE MATERIALIZED VIEW tag_history_1week
 WITH (timescaledb.continuous) AS
 SELECT
-    time_bucket('1 week', bucket) AS bucket,
+    time_bucket(604800000, bucket) AS bucket,
     tagid,
     AVG(avg_value) AS avg_value,
     MAX(max_value) AS max_value,
@@ -333,8 +333,8 @@ GROUP BY bucket, tagid;
 
 -- Policies
 SELECT add_continuous_aggregate_policy('tag_history_1week',
-    start_offset => INTERVAL '4 weeks',
-    end_offset => INTERVAL '1 week',
+    start_offset => 2419200000,
+    end_offset => 604800000,
     schedule_interval => INTERVAL '1 week'
 );
 ```
@@ -347,7 +347,7 @@ For very long-term data:
 CREATE MATERIALIZED VIEW tag_history_1month
 WITH (timescaledb.continuous) AS
 SELECT
-    time_bucket('1 month', bucket) AS bucket,
+    time_bucket(2592000000, bucket) AS bucket,
     tagid,
     AVG(avg_value) AS avg_value,
     MAX(max_value) AS max_value,
@@ -358,8 +358,8 @@ GROUP BY bucket, tagid;
 
 -- Policies
 SELECT add_continuous_aggregate_policy('tag_history_1month',
-    start_offset => INTERVAL '3 months',
-    end_offset => INTERVAL '1 month',
+    start_offset => 7776000000,
+    end_offset => 2592000000,
     schedule_interval => INTERVAL '1 month'
 );
 ```
@@ -456,13 +456,13 @@ Timeline:
 
 ```sql
 -- For recent, frequently changing data
-start_offset => INTERVAL '1 hour'   -- Refresh last hour
-end_offset => INTERVAL '1 minute'   -- Exclude most recent minute
+start_offset => 3600000   -- Refresh last hour
+end_offset => 60000   -- Exclude most recent minute
 schedule_interval => INTERVAL '5 minutes'  -- Run every 5 minutes
 
 -- For stable historical data
-start_offset => INTERVAL '7 days'   -- Refresh last week
-end_offset => INTERVAL '1 day'      -- Exclude today
+start_offset => 604800000   -- Refresh last week
+end_offset => 86400000      -- Exclude today
 schedule_interval => INTERVAL '1 day'  -- Run daily
 ```
 
@@ -489,8 +489,8 @@ SELECT remove_continuous_aggregate_policy('tag_history_1min');
 
 -- Add new policy with different parameters
 SELECT add_continuous_aggregate_policy('tag_history_1min',
-    start_offset => INTERVAL '2 hours',
-    end_offset => INTERVAL '5 minutes',
+    start_offset => 7200000,
+    end_offset => 300000,
     schedule_interval => INTERVAL '10 minutes'
 );
 ```
@@ -831,7 +831,7 @@ ALTER MATERIALIZED VIEW tag_history_1hour SET (
     timescaledb.compress = true
 );
 
-SELECT add_compression_policy('tag_history_1hour', INTERVAL '7 days');
+SELECT add_compression_policy('tag_history_1hour', BIGINT '604800000');
 ```
 
 **2. Add indexes:**
@@ -873,7 +873,7 @@ Include additional statistics:
 CREATE MATERIALIZED VIEW tag_history_1min_advanced
 WITH (timescaledb.continuous) AS
 SELECT
-    time_bucket('1 minute', t_stamp) AS bucket,
+    time_bucket(60000, t_stamp) AS bucket,
     tagid,
     AVG(COALESCE(intvalue, floatvalue)) AS avg_value,
     MAX(COALESCE(intvalue, floatvalue)) AS max_value,
@@ -896,7 +896,7 @@ Create aggregates for specific tag groups:
 CREATE MATERIALIZED VIEW temperature_history_1hour
 WITH (timescaledb.continuous) AS
 SELECT
-    time_bucket('1 hour', t_stamp) AS bucket,
+    time_bucket(3600000, t_stamp) AS bucket,
     tagid,
     AVG(COALESCE(intvalue, floatvalue)) AS avg_temp,
     MAX(COALESCE(intvalue, floatvalue)) AS max_temp,
@@ -917,7 +917,7 @@ For near real-time dashboards:
 CREATE MATERIALIZED VIEW tag_history_10sec
 WITH (timescaledb.continuous) AS
 SELECT
-    time_bucket('10 seconds', t_stamp) AS bucket,
+    time_bucket(10000, t_stamp) AS bucket,
     tagid,
     AVG(COALESCE(intvalue, floatvalue)) AS avg_value,
     COUNT(*) AS sample_count
@@ -926,13 +926,13 @@ GROUP BY bucket, tagid;
 
 -- Refresh every 30 seconds
 SELECT add_continuous_aggregate_policy('tag_history_10sec',
-    start_offset => INTERVAL '5 minutes',
-    end_offset => INTERVAL '10 seconds',
+    start_offset => 300000,
+    end_offset => 10000,
     schedule_interval => INTERVAL '30 seconds'
 );
 
 -- Keep only 7 days
-SELECT add_retention_policy('tag_history_10sec', INTERVAL '7 days');
+SELECT add_retention_policy('tag_history_10sec', drop_after => BIGINT '604800000');
 ```
 
 ---
@@ -1125,14 +1125,14 @@ SELECT * FROM timescaledb_information.continuous_aggregates;
 ```sql
 -- Various time bucket sizes
 time_bucket('1 second', t_stamp)
-time_bucket('10 seconds', t_stamp)
-time_bucket('1 minute', t_stamp)
+time_bucket(10000, t_stamp)
+time_bucket(60000, t_stamp)
 time_bucket('5 minutes', t_stamp)
 time_bucket('15 minutes', t_stamp)
-time_bucket('1 hour', t_stamp)
-time_bucket('1 day', t_stamp)
-time_bucket('1 week', t_stamp)
-time_bucket('1 month', t_stamp)
+time_bucket(3600000, t_stamp)
+time_bucket(86400000, t_stamp)
+time_bucket(604800000, t_stamp)
+time_bucket(2592000000, t_stamp)
 ```
 
 ### Additional Resources

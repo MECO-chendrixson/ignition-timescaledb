@@ -230,9 +230,10 @@ ORDER BY range_start DESC;
 -- Compress a specific chunk
 SELECT compress_chunk('_timescaledb_internal._hyper_1_1_chunk');
 
--- Compress all eligible chunks
+-- Compress all eligible chunks older than 7 days
+-- For BIGINT time columns, use milliseconds: 604800000 ms = 7 days
 SELECT compress_chunk(i, if_not_compressed => true)
-FROM show_chunks('sqlth_1_data', older_than => INTERVAL '7 days') i;
+FROM show_chunks('sqlth_1_data', older_than => 604800000) i;
 ```
 
 ### Decompress Chunks
@@ -274,7 +275,8 @@ ALTER TABLE sqlth_1_data SET (
     timescaledb.compress_segmentby = 'tagid'
 );
 
-SELECT add_compression_policy('sqlth_1_data', INTERVAL '7 days');
+-- Compress after 7 days (604800000 ms)
+SELECT add_compression_policy('sqlth_1_data', BIGINT '604800000');
 ```
 
 ### Strategy 2: Read-Only Archive
@@ -292,8 +294,8 @@ ALTER TABLE sqlth_1_data SET (
     timescaledb.compress_segmentby = 'tagid'
 );
 
--- Compress aggressively after 1 day
-SELECT add_compression_policy('sqlth_1_data', INTERVAL '1 day');
+-- Compress aggressively after 1 day (86400000 ms)
+SELECT add_compression_policy('sqlth_1_data', BIGINT '86400000');
 ```
 
 ### Strategy 3: High-Frequency Data
@@ -311,7 +313,8 @@ ALTER TABLE sqlth_1_data SET (
     timescaledb.compress_segmentby = 'tagid, dataintegrity'
 );
 
-SELECT add_compression_policy('sqlth_1_data', INTERVAL '3 days');
+-- Compress after 3 days (259200000 ms)
+SELECT add_compression_policy('sqlth_1_data', BIGINT '259200000');
 ```
 
 ### Strategy 4: Analytical Workload
@@ -329,7 +332,8 @@ ALTER TABLE sqlth_1_data SET (
     timescaledb.compress_segmentby = 'tagid'
 );
 
-SELECT add_compression_policy('sqlth_1_data', INTERVAL '14 days');
+-- Compress after 14 days (1209600000 ms)
+SELECT add_compression_policy('sqlth_1_data', BIGINT '1209600000');
 ```
 
 ---
@@ -521,7 +525,8 @@ WHERE application_name LIKE '%Compression%'
 
 **If no results:** Add compression policy:
 ```sql
-SELECT add_compression_policy('sqlth_1_data', INTERVAL '7 days');
+-- Add compression policy (7 days = 604800000 ms)
+SELECT add_compression_policy('sqlth_1_data', BIGINT '604800000');
 ```
 
 **2. Check if chunks are old enough:**
@@ -727,7 +732,8 @@ WHERE application_name LIKE '%Compression%';
 
 -- Modify compression policy
 SELECT remove_compression_policy('sqlth_1_data');
-SELECT add_compression_policy('sqlth_1_data', INTERVAL '14 days');
+-- Add new policy with 14 days (1209600000 ms)
+SELECT add_compression_policy('sqlth_1_data', BIGINT '1209600000');
 ```
 
 ### Additional Resources

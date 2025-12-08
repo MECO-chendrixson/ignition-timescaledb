@@ -86,7 +86,7 @@ These work together:
 **Configuration:**
 ```sql
 -- 10 year retention
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '10 years');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '315360000000');
 ```
 
 **Reasoning:**
@@ -104,10 +104,10 @@ SELECT add_retention_policy('sqlth_1_data', INTERVAL '10 years');
 **Configuration:**
 ```sql
 -- 7 year retention (common FDA requirement)
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '7 years');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '220752000000');
 
 -- Or specific date-based retention
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '2555 days'); -- Exactly 7 years
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '220723200000'); -- Exactly 7 years
 ```
 
 **Reasoning:**
@@ -125,7 +125,7 @@ SELECT add_retention_policy('sqlth_1_data', INTERVAL '2555 days'); -- Exactly 7 
 **Configuration:**
 ```sql
 -- 2 year retention (common GDPR interpretation)
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '2 years');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '63072000000');
 ```
 
 **Reasoning:**
@@ -143,10 +143,10 @@ SELECT add_retention_policy('sqlth_1_data', INTERVAL '2 years');
 **Configuration:**
 ```sql
 -- 90 day retention
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '90 days');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '7776000000');
 
 -- Or 1 year for minimal history
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '1 year');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '31536000000');
 ```
 
 ### Strategy 5: Indefinite Retention
@@ -162,7 +162,7 @@ SELECT add_retention_policy('sqlth_1_data', INTERVAL '1 year');
 -- Simply don't add a retention policy
 
 -- Or very long retention
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '100 years');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '3153600000000');
 ```
 
 ---
@@ -184,35 +184,35 @@ psql -U postgres -d historian -f sql/schema/02-configure-hypertables.sql
 \c historian
 
 -- Add retention policy (choose your interval)
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '10 years');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '315360000000');
 ```
 
 **Common intervals:**
 ```sql
 -- 1 year
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '1 year');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '31536000000');
 
 -- 2 years
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '2 years');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '63072000000');
 
 -- 5 years
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '5 years');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '157680000000');
 
 -- 7 years (FDA compliance)
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '7 years');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '220752000000');
 
 -- 10 years (recommended default)
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '10 years');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '315360000000');
 ```
 
 ### Advanced: Specific Duration
 
 ```sql
 -- Exact number of days
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '3650 days'); -- Exactly 10 years
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '315360000000'); -- Exactly 10 years
 
 -- In milliseconds (for precise control)
-SELECT add_retention_policy('sqlth_1_data', 315360000000); -- 10 years in ms
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '315360000000'); -- 10 years in ms
 ```
 
 ---
@@ -226,7 +226,7 @@ SELECT add_retention_policy('sqlth_1_data', 315360000000); -- 10 years in ms
 SELECT remove_retention_policy('sqlth_1_data');
 
 -- Add new policy with different interval
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '5 years');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '157680000000');
 ```
 
 ### Temporarily Disable Retention
@@ -430,7 +430,7 @@ WHERE application_name = 'Retention Policy'
 **If no results:**
 ```sql
 -- Policy doesn't exist, add it
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '10 years');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '315360000000');
 ```
 
 **If job failed:**
@@ -475,7 +475,7 @@ WHERE application_name = 'Retention Policy'
 SELECT remove_retention_policy('sqlth_1_data');
 
 -- Add correct policy
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '10 years');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '315360000000');
 ```
 
 **⚠️ Warning:** Deleted data cannot be recovered. Ensure backups exist.
@@ -520,16 +520,16 @@ If you need to keep some old data:
 
 ```sql
 -- Raw data: 2 years
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '2 years');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '63072000000');
 
 -- 1-minute aggregates: 5 years
-SELECT add_retention_policy('tag_history_1min', INTERVAL '5 years');
+SELECT add_retention_policy('tag_history_1min', drop_after => BIGINT '157680000000');
 
 -- Hourly aggregates: 10 years
-SELECT add_retention_policy('tag_history_1hour', INTERVAL '10 years');
+SELECT add_retention_policy('tag_history_1hour', drop_after => BIGINT '315360000000');
 
 -- Daily aggregates: 20 years
-SELECT add_retention_policy('tag_history_1day', INTERVAL '20 years');
+SELECT add_retention_policy('tag_history_1day', drop_after => BIGINT '630720000000');
 ```
 
 **Benefits:**
@@ -597,7 +597,7 @@ GROUP BY config;
 
 ```sql
 -- Add retention policy
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '10 years');
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '315360000000');
 
 -- Remove retention policy
 SELECT remove_retention_policy('sqlth_1_data');
