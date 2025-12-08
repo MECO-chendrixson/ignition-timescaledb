@@ -227,16 +227,74 @@ This tells TimescaleDB how to interpret "now" for your hypertable.
 
 ---
 
-## Configuring Chunk Behavior
+## Configuring Compression
 
-### Optimize Chunk Closing
+### Enable Compression on Hypertable
+
+The first step is to enable compression and configure how data should be compressed:
 
 ```sql
--- Configure chunk closing behavior
+-- Enable compression with optimal settings for Ignition historian
 ALTER TABLE sqlth_1_data SET (
-    timescaledb.compress_after = '7 days',
-    timescaledb.compress_chunk_time_interval = '7 days'
+    timescaledb.compress,
+    timescaledb.compress_orderby = 't_stamp DESC',
+    timescaledb.compress_segmentby = 'tagid'
 );
+```
+
+**Valid compression parameters:**
+- `timescaledb.compress` - Enables compression (required)
+- `timescaledb.compress_orderby` - Sort order within compressed batches
+- `timescaledb.compress_segmentby` - Columns that partition compressed data
+
+**What these settings do:**
+- **compress_orderby = 't_stamp DESC'**: Stores most recent data first in compressed batches (optimal for time-series queries)
+- **compress_segmentby = 'tagid'**: Each tag's data is compressed separately (enables efficient tag-specific queries)
+
+### Add Compression Policy
+
+After enabling compression, create a policy to automatically compress old chunks:
+
+```sql
+-- Compress chunks older than 7 days
+SELECT add_compression_policy('sqlth_1_data', INTERVAL '7 days');
+```
+
+**This creates a background job that:**
+- Runs periodically (default: every 4 hours)
+- Finds chunks older than 7 days
+- Compresses them automatically
+- Requires no manual intervention
+
+**⚠️ Common Mistake to Avoid:**
+
+Do NOT use `timescaledb.compress_after` - this parameter does not exist and will cause an error:
+```sql
+-- ❌ WRONG - This will fail!
+ALTER TABLE sqlth_1_data SET (
+    timescaledb.compress_after = '7 days'  -- Invalid parameter!
+);
+```
+
+**✅ Correct approach:**
+1. First, enable compression with `ALTER TABLE SET (timescaledb.compress, ...)`
+2. Then, add compression policy with `add_compression_policy()` function
+
+### View Compression Settings
+
+```sql
+-- Check current compression configuration
+SELECT * FROM timescaledb_information.compression_settings
+WHERE hypertable_name = 'sqlth_1_data';
+```
+
+### View Compression Policies
+
+```sql
+-- Check active compression policy
+SELECT * FROM timescaledb_information.jobs
+WHERE application_name = 'Compression Policy'
+  AND hypertable_name = 'sqlth_1_data';
 ```
 
 ### View Chunk Information
