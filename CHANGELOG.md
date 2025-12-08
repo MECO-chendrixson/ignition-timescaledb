@@ -72,6 +72,43 @@ All notable changes to this documentation project will be documented in this fil
 - Automatic backup creation
 - Data validation post-migration
 
+## [1.3.0] - 2025-12-08
+
+### Added
+
+- **Platform-Specific Installation Guides** - Separate guides for Windows and Linux
+  - [Installation - Windows](docs/getting-started/01-installation-windows.md) - Complete Windows Server guide
+  - [Installation - Linux](docs/getting-started/01-installation-linux.md) - Complete Ubuntu/Debian guide
+- **Platform-Specific Database Setup** - Tailored setup instructions
+  - [Database Setup - Windows](docs/getting-started/02-database-setup-windows.md) - Windows-specific setup
+  - [Database Setup - Linux](docs/getting-started/02-database-setup-linux.md) - Linux-specific setup
+- **Platform Selector** - Landing page to choose Windows or Linux path
+- **Windows-Specific Features**
+  - GUI-based installation instructions
+  - Windows Firewall configuration
+  - Task Scheduler backup setup
+  - Windows Service management
+- **Linux-Specific Features**
+  - APT package manager instructions
+  - UFW/firewalld configuration
+  - Cron-based backup automation
+  - systemctl service management
+
+### Documentation
+
+- Platform comparison table
+- Separate troubleshooting for each OS
+- OS-specific performance tuning recommendations
+- Platform-specific file locations and paths
+- Security hardening for both platforms
+
+### Changed
+
+- Restructured Getting Started documentation with platform paths
+- Updated README.md with clear platform selection
+- Updated INDEX.md with platform-specific sections
+- Separated installation and database setup by platform
+
 ## [1.2.0] - 2025-12-08
 
 ### Added

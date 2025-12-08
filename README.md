@@ -1,8 +1,8 @@
 # Ignition SCADA + TimescaleDB Integration Guide
 
-**Version:** 1.2.0  
+**Version:** 1.3.0  
 **Last Updated:** December 8, 2025  
-**Compatible with:** Ignition 8.1+ and 8.3+, TimescaleDB 2.x
+**Compatible with:** Ignition 8.1+ and 8.3+, TimescaleDB 2.x, Windows Server 2016+, Ubuntu 20.04+
 
 ## Overview
 
@@ -31,10 +31,21 @@ This documentation provides comprehensive guidance for integrating TimescaleDB w
 ## Documentation Structure
 
 ### Getting Started
+
+**Choose Your Platform:**
+- [🎯 Platform Selector](docs/getting-started/00-platform-selector.md) - **START HERE** - Choose Windows or Linux
+
+**Windows Server:**
+- [Installation - Windows](docs/getting-started/01-installation-windows.md) - PostgreSQL + TimescaleDB on Windows
+- [Database Setup - Windows](docs/getting-started/02-database-setup-windows.md) - Create databases on Windows
+
+**Linux (Ubuntu/Debian):**
+- [Installation - Linux](docs/getting-started/01-installation-linux.md) - PostgreSQL + TimescaleDB on Linux
+- [Database Setup - Linux](docs/getting-started/02-database-setup-linux.md) - Create databases on Linux
+
+**Platform-Independent:**
 - [Quick Start Guide](docs/getting-started/00-quick-start.md) - Fast-track setup for experienced users
-- [Quick Reference](docs/getting-started/04-quick-reference.md) - **NEW!** Copy-paste commands for Ignition 8.1 & 8.3
-- [Installation Guide](docs/getting-started/01-installation.md) - Install PostgreSQL and TimescaleDB
-- [Database Setup](docs/getting-started/02-database-setup.md) - Create and configure databases
+- [Quick Reference](docs/getting-started/04-quick-reference.md) - Copy-paste commands for both platforms
 - [Ignition Configuration](docs/getting-started/03-ignition-configuration.md) - Configure Ignition historian
 
 ### Configuration
@@ -130,5 +141,5 @@ This documentation is provided as-is for educational and reference purposes.
 ---
 
 **Last Review:** December 8, 2025  
-**Document Version:** 1.2.0  
+**Document Version:** 1.3.0  
 **Maintained By:** Miller-Eads Automation

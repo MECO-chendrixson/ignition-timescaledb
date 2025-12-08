@@ -13,12 +13,32 @@ Complete index of all documentation for Ignition + TimescaleDB integration.
 
 ## Getting Started
 
+### Platform Selection
+
+| Document | Description | For |
+|----------|-------------|-----|
+| [🎯 Platform Selector](getting-started/00-platform-selector.md) | **START HERE** - Choose your platform | Everyone |
+
+### Windows Server Path
+
+| Document | Description | Difficulty |
+|----------|-------------|------------|
+| [Installation - Windows](getting-started/01-installation-windows.md) | PostgreSQL + TimescaleDB on Windows | Beginner |
+| [Database Setup - Windows](getting-started/02-database-setup-windows.md) | Create databases on Windows | Beginner |
+
+### Linux (Ubuntu/Debian) Path
+
+| Document | Description | Difficulty |
+|----------|-------------|------------|
+| [Installation - Linux](getting-started/01-installation-linux.md) | PostgreSQL + TimescaleDB on Linux | Beginner |
+| [Database Setup - Linux](getting-started/02-database-setup-linux.md) | Create databases on Linux | Beginner |
+
+### Platform-Independent
+
 | Document | Description | Difficulty |
 |----------|-------------|------------|
 | [Quick Start Guide](getting-started/00-quick-start.md) | Fast-track setup (30 min) | Intermediate |
-| [Quick Reference](getting-started/04-quick-reference.md) | **NEW!** Copy-paste commands for 8.1 & 8.3 | All Levels |
-| [Installation Guide](getting-started/01-installation.md) | PostgreSQL & TimescaleDB install | Beginner |
-| [Database Setup](getting-started/02-database-setup.md) | Create databases and users | Beginner |
+| [Quick Reference](getting-started/04-quick-reference.md) | Copy-paste commands for 8.1 & 8.3 | All Levels |
 | [Ignition Configuration](getting-started/03-ignition-configuration.md) | Configure Ignition historian | Intermediate |
 
 ---
@@ -146,4 +166,4 @@ Status: Pending
 ---
 
 **Last Updated:** December 8, 2025  
-**Version:** 1.2.0
+**Version:** 1.3.0
