@@ -1,5 +1,9 @@
 # Contributing to Ignition TimescaleDB Integration
 
+**Version:** 1.3.0  
+**Last Updated:** December 8, 2025  
+**Maintained by:** Miller-Eads Automation
+
 Thank you for your interest in contributing to this documentation project!
 
 ## How to Contribute
