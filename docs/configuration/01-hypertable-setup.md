@@ -550,9 +550,9 @@ LIMIT 5;
 For varying data patterns:
 
 ```sql
--- Not recommended for beginners, but possible:
--- You can change chunk interval (affects future chunks only)
-SELECT set_chunk_time_interval('sqlth_1_data', INTERVAL '12 hours');
+-- Change chunk interval (affects future chunks only)
+-- For BIGINT time columns, use integer milliseconds (12 hours = 43200000 ms)
+SELECT set_chunk_time_interval('sqlth_1_data', 43200000);
 ```
 
 ### Multiple Time Dimensions (Advanced)
@@ -646,8 +646,9 @@ SELECT * FROM show_chunks('sqlth_1_data');
 -- Get hypertable statistics
 SELECT * FROM hypertable_detailed_size('sqlth_1_data');
 
--- Drop a specific chunk (careful!)
-SELECT drop_chunks('sqlth_1_data', older_than => INTERVAL '2 years');
+-- Drop chunks older than 2 years (for BIGINT time column, use milliseconds)
+-- 2 years = 63072000000 milliseconds
+SELECT drop_chunks('sqlth_1_data', older_than => 63072000000);
 ```
 
 ### Additional Resources

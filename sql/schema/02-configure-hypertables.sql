@@ -138,11 +138,9 @@ SELECT set_integer_now_func('sqlth_1_data', 'unix_now');
 \echo 'Policy: Compress chunks older than 7 days'
 \echo ''
 
--- Compress chunks older than 7 days (604800000 milliseconds)
-SELECT add_compression_policy('sqlth_1_data', INTERVAL '7 days');
-
--- Alternative using milliseconds (if interval doesn't work):
--- CALL add_columnstore_policy('sqlth_1_data', 604800000);
+-- Compress chunks older than 7 days (604800000 milliseconds = 7 days)
+-- For BIGINT time columns, must use BIGINT type casting
+SELECT add_compression_policy('sqlth_1_data', BIGINT '604800000');
 
 \echo '✓ Compression policy added'
 \echo '  - Chunks older than 7 days will be compressed automatically'
@@ -157,19 +155,20 @@ SELECT add_compression_policy('sqlth_1_data', INTERVAL '7 days');
 \echo 'Choose retention period based on your requirements:'
 \echo ''
 
--- Default: 10 years (uncomment to enable)
-SELECT add_retention_policy('sqlth_1_data', INTERVAL '10 years');
+-- Default: 10 years (315360000000 milliseconds = 10 years)
+-- For BIGINT time columns, must use BIGINT type casting
+SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '315360000000');
 
 -- Alternative retention periods (comment out the one above and uncomment your choice):
 
--- 1 year retention
--- SELECT add_retention_policy('sqlth_1_data', INTERVAL '1 year');
+-- 1 year retention (31536000000 milliseconds)
+-- SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '31536000000');
 
--- 2 years retention
--- SELECT add_retention_policy('sqlth_1_data', INTERVAL '2 years');
+-- 2 years retention (63072000000 milliseconds)
+-- SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '63072000000');
 
--- 5 years retention
--- SELECT add_retention_policy('sqlth_1_data', INTERVAL '5 years');
+-- 5 years retention (157680000000 milliseconds)
+-- SELECT add_retention_policy('sqlth_1_data', drop_after => BIGINT '157680000000');
 
 \echo '✓ Retention policy added'
 \echo '  - Data older than retention period will be automatically deleted'
