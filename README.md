@@ -92,7 +92,7 @@ This documentation provides comprehensive guidance for integrating TimescaleDB w
 - [Maintenance Queries](sql/maintenance/) - Administrative queries
 
 ### Additional Resources
-- [Official Ignition Documentation](https://docs.inductiveautomation.com/docs/8.3/)
+- [Official Ignition Documentation](https://docs.inductiveautomation.com/docs/8.3/intro)
 - [TimescaleDB Documentation](https://docs.timescale.com/)
 - [Community Forum Discussions](https://forum.inductiveautomation.com/t/timeseries-db-for-postgresql/21770)
 - [GitHub Examples](https://github.com/aRaymo/Using-TimeScaleDB-with-Ignition)
