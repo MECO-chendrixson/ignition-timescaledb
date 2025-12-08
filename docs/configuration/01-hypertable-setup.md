@@ -256,23 +256,32 @@ ALTER TABLE sqlth_1_data SET (
 After enabling compression, create a policy to automatically compress old chunks:
 
 ```sql
--- Compress chunks older than 7 days (7 days in milliseconds)
-SELECT add_compression_policy('sqlth_1_data', compress_after => 604800000);
+-- Compress chunks older than 7 days (604800000 milliseconds = 7 days)
+SELECT add_compression_policy('sqlth_1_data', BIGINT '604800000');
 ```
 
 **This creates a background job that:**
 - Runs periodically (default: every 12 hours)
-- Finds chunks older than 7 days (604800000 milliseconds = 7 days)
+- Finds chunks older than 7 days (calculated as `now - 604800000` milliseconds)
 - Compresses them automatically
 - Requires no manual intervention
 
-**Common compression intervals:**
-- 7 days: `604800000` milliseconds
-- 14 days: `1209600000` milliseconds
-- 30 days: `2592000000` milliseconds
-- 90 days: `7776000000` milliseconds
+**Common compression intervals (with BIGINT casting):**
+```sql
+-- 7 days
+SELECT add_compression_policy('sqlth_1_data', BIGINT '604800000');
 
-**Note:** Because the time column is BIGINT (milliseconds since epoch), compression intervals must be specified as integers in milliseconds, not INTERVAL types.
+-- 14 days
+SELECT add_compression_policy('sqlth_1_data', BIGINT '1209600000');
+
+-- 30 days
+SELECT add_compression_policy('sqlth_1_data', BIGINT '2592000000');
+
+-- 90 days
+SELECT add_compression_policy('sqlth_1_data', BIGINT '7776000000');
+```
+
+**Important:** Because Ignition's `t_stamp` column is BIGINT (milliseconds since epoch), you must use `BIGINT` type casting with the integer value in milliseconds. This requires that the `integer_now_func` is set (which we configured in Step 5 above).
 
 ### View Compression Settings
 
