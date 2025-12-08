@@ -653,8 +653,8 @@ SELECT drop_chunks('sqlth_1_data', older_than => 63072000000);
 
 ### Additional Resources
 
-- [TimescaleDB Hypertables Documentation](https://docs.timescale.com/use-timescale/latest/hypertables/)
-- [Chunk Configuration Best Practices](https://docs.timescale.com/use-timescale/latest/hypertables/about-hypertables/)
+- [TimescaleDB Hypertables Documentation](https://www.tigerdata.com/docs/use-timescale/latest/hypertables/)
+- [Chunk Configuration Best Practices](https://www.tigerdata.com/docs/use-timescale/latest/hypertables/about-hypertables/)
 - [Ignition Tag Historian](https://docs.inductiveautomation.com/docs/8.3/intro)
 
 ---

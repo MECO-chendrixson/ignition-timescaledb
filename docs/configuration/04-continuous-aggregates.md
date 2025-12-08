@@ -1138,9 +1138,9 @@ time_bucket(2592000000, t_stamp) -- 30 days (approx 1 month)
 
 ### Additional Resources
 
-- [TimescaleDB Continuous Aggregates Documentation](https://docs.timescale.com/use-timescale/latest/continuous-aggregates/)
-- [Hierarchical Aggregates Guide](https://docs.timescale.com/use-timescale/latest/continuous-aggregates/hierarchical-continuous-aggregates/)
-- [Refresh Policies](https://docs.timescale.com/api/latest/continuous-aggregates/add_continuous_aggregate_policy/)
+- [TimescaleDB Continuous Aggregates Documentation](https://www.tigerdata.com/docs/use-timescale/latest/continuous-aggregates/)
+- [Hierarchical Aggregates Guide](https://www.tigerdata.com/docs/use-timescale/latest/continuous-aggregates/hierarchical-continuous-aggregates/)
+- [Refresh Policies](https://www.tigerdata.com/docs/api/latest/continuous-aggregates/add_continuous_aggregate_policy/)
 - [Ignition Database Table Historian](https://docs.inductiveautomation.com/docs/8.1/intro/ignition/ignition-modules/sql-bridge-module/database-table-historian)
 
 ---

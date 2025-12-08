@@ -7,7 +7,7 @@
 
 ## Overview
 
-Comprehensive, production-ready documentation for integrating Ignition SCADA 8.3.2+ with TimescaleDB for high-performance time-series data storage, analysis, and machine learning applications.
+Comprehensive, production-ready documentation for integrating Ignition SCADA 8.3.0+ (LTS) with TimescaleDB for high-performance time-series data storage, analysis, and machine learning applications.
 
 ---
 
@@ -297,8 +297,8 @@ Problem-solving guides:
 ### Supported Platforms
 - **Operating Systems:** Windows Server 2016+, Ubuntu 20.04+, RHEL/Rocky 8+
 - **PostgreSQL:** Versions 12, 13, 14, 15, 16, 17
-- **TimescaleDB:** Versions 2.0 through 2.13+
-- **Ignition:** Versions 8.1+ and 8.3.2+
+- **TimescaleDB:** Versions 2.0 through 2.24+
+- **Ignition:** Versions 8.1+ (LTS) and 8.3.0+ (Current LTS)
 
 ### Performance Targets
 - **Compression Ratio:** 10-20x storage reduction
@@ -383,8 +383,8 @@ Problem-solving guides:
 - Estimated time for each procedure
 
 ### Technical Standards
-- SQL examples tested against PostgreSQL 15 + TimescaleDB 2.13
-- Ignition examples tested with version 8.3.2
+- SQL examples tested against PostgreSQL 15-18 + TimescaleDB 2.24
+- Ignition examples tested with version 8.3.0+
 - Windows examples tested on Server 2022
 - Linux examples tested on Ubuntu 22.04
 - All external links verified (HTTP 200 status)
@@ -396,7 +396,7 @@ Problem-solving guides:
 ### Problems Solved
 ✅ Addressed all Ignition forum community questions  
 ✅ Documented TimescaleDB setup from scratch  
-✅ Covered Ignition 8.3.2 historian changes  
+✅ Covered Ignition 8.3.0+ historian changes  
 ✅ Provided automated maintenance solutions  
 ✅ Included ML integration pathways  
 ✅ Offered multiple skill-level paths  

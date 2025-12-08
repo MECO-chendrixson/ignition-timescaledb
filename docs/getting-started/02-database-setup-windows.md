@@ -453,7 +453,7 @@ forfiles /p "%BACKUP_DIR%" /m *.backup /d -30 /c "cmd /c del @path"
 ## Additional Resources
 
 - [PostgreSQL Backup Documentation](https://www.postgresql.org/docs/current/backup.html)
-- [TimescaleDB Best Practices](https://docs.timescale.com/timescaledb/latest/how-to-guides/user-defined-actions/)
+- [TimescaleDB Best Practices](https://www.tigerdata.com/docs/timescaledb/latest/how-to-guides/user-defined-actions/)
 - [SQL Script Repository](../../sql/schema/)
 
 ---

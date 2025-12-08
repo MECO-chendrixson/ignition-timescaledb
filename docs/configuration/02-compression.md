@@ -738,8 +738,8 @@ SELECT add_compression_policy('sqlth_1_data', BIGINT '1209600000');
 
 ### Additional Resources
 
-- [TimescaleDB Compression Documentation](https://docs.timescale.com/use-timescale/latest/compression/)
-- [Compression Best Practices](https://docs.timescale.com/use-timescale/latest/compression/about-compression/)
+- [TimescaleDB Compression Documentation](https://www.tigerdata.com/docs/use-timescale/latest/compression/)
+- [Compression Best Practices](https://www.tigerdata.com/docs/use-timescale/latest/compression/about-compression/)
 - [Performance Tuning Guide](../optimization/01-performance-tuning.md)
 
 ---

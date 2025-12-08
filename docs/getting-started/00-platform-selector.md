@@ -139,7 +139,7 @@ These guides work for both Windows and Linux:
 - **Storage:** SSD with 100GB+ free space
 - **CPU:** 4+ cores
 - **PostgreSQL:** Version 15 or 17
-- **TimescaleDB:** Version 2.13+
+- **TimescaleDB:** Version 2.24+
 
 ---
 

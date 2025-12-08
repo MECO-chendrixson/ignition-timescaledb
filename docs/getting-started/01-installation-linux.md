@@ -32,8 +32,8 @@ This guide covers installing PostgreSQL and TimescaleDB on Ubuntu/Debian Linux f
 - **OS:** Ubuntu 20.04 LTS or Debian 11+
 - **RAM:** 4GB (8GB+ recommended)
 - **Storage:** 20GB free space (more for production data)
-- **PostgreSQL:** Version 12+ (15-17 recommended)
-- **TimescaleDB:** Version 2.0+ (2.13+ recommended)
+- **PostgreSQL:** Version 13+ (15-18 supported, 17+ recommended)
+- **TimescaleDB:** Version 2.0+ (2.24+ recommended)
 
 ### Recommended Production Requirements
 - **OS:** Ubuntu 22.04 LTS or Ubuntu 24.04 LTS
@@ -81,7 +81,13 @@ sudo apt update
 
 ### Step 2: Install PostgreSQL
 
-**Install PostgreSQL 17 (recommended):**
+**Install PostgreSQL 17 or 18 (recommended):**
+
+**For PostgreSQL 18 (latest):**
+
+```bash
+sudo apt install -y postgresql-18 postgresql-client-18 postgresql-contrib-18
+```
 
 ```bash
 sudo apt install -y postgresql-17 postgresql-client-17 postgresql-contrib-17
@@ -165,7 +171,7 @@ sudo systemctl restart postgresql
 sudo -u postgres psql -c "SELECT default_version FROM pg_available_extensions WHERE name = 'timescaledb';"
 ```
 
-**Expected:** Version number displayed (e.g., 2.13.0)
+**Expected:** Version number displayed (e.g., 2.24.0)
 
 ---
 
@@ -661,7 +667,7 @@ sudo systemctl restart postgresql
 ## Additional Resources
 
 - [PostgreSQL Linux Documentation](https://www.postgresql.org/docs/current/install-linux.html)
-- [TimescaleDB Linux Installation](https://docs.timescale.com/self-hosted/latest/install/installation-linux/)
+- [TimescaleDB Linux Installation](https://www.tigerdata.com/docs/self-hosted/latest/install/installation-linux/)
 - [PostgreSQL Ubuntu Installation](https://www.postgresql.org/download/linux/ubuntu/)
 - [PostgreSQL Performance Tuning](https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server)
 

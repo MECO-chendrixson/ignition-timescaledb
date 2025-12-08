@@ -619,8 +619,8 @@ FROM sqlth_1_data;
 
 ### Additional Resources
 
-- [TimescaleDB Retention Documentation](https://docs.timescale.com/use-timescale/latest/data-retention/)
-- [Data Retention Best Practices](https://docs.timescale.com/use-timescale/latest/data-retention/about-data-retention/)
+- [TimescaleDB Retention Documentation](https://www.tigerdata.com/docs/use-timescale/latest/data-retention/)
+- [Data Retention Best Practices](https://www.tigerdata.com/docs/use-timescale/latest/data-retention/about-data-retention/)
 - [FDA 21 CFR Part 11 Guidelines](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/part-11-electronic-records-electronic-signatures-scope-and-application)
 
 ---

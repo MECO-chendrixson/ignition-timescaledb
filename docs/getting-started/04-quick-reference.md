@@ -495,7 +495,7 @@ After completing this quick setup:
 ### External Resources
 - [Ignition 8.1 Documentation](https://docs.inductiveautomation.com/docs/8.1/)
 - [Ignition 8.3 Documentation](https://docs.inductiveautomation.com/docs/8.3/)
-- [TimescaleDB Documentation](https://docs.timescale.com/)
+- [TimescaleDB Documentation](https://www.tigerdata.com/docs/)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 
 ### Community
@@ -506,4 +506,4 @@ After completing this quick setup:
 
 **Document Version:** 1.1.0  
 **Last Updated:** December 8, 2025  
-**Compatible with:** Ignition 8.1+ and 8.3+, PostgreSQL 12+, TimescaleDB 2.0+
+**Compatible with:** Ignition 8.1+ and 8.3+, PostgreSQL 13+, TimescaleDB 2.0+

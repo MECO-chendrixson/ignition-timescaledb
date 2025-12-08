@@ -143,7 +143,7 @@ Status: Pending
 ### External Links
 
 - [Ignition 8.3 Documentation](https://docs.inductiveautomation.com/docs/8.3/)
-- [TimescaleDB Documentation](https://docs.timescale.com/)
+- [TimescaleDB Documentation](https://www.tigerdata.com/docs/)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [Ignition Forum](https://forum.inductiveautomation.com/)
 - [TimescaleDB Community](https://timescale.com/community)

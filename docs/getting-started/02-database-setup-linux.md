@@ -575,7 +575,7 @@ sudo -u postgres psql -c "SELECT datname, count(*) FROM pg_stat_activity WHERE d
 ## Additional Resources
 
 - [PostgreSQL Backup Documentation](https://www.postgresql.org/docs/current/backup.html)
-- [TimescaleDB Best Practices](https://docs.timescale.com/timescaledb/latest/how-to-guides/user-defined-actions/)
+- [TimescaleDB Best Practices](https://www.tigerdata.com/docs/timescaledb/latest/how-to-guides/user-defined-actions/)
 - [SQL Script Repository](../../sql/schema/)
 - [Linux Cron Tutorial](https://crontab.guru/)
 

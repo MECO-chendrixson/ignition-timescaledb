@@ -32,8 +32,8 @@ This guide covers installing PostgreSQL and TimescaleDB on Windows Server for us
 - **OS:** Windows Server 2016 or higher
 - **RAM:** 4GB (8GB+ recommended)
 - **Storage:** 20GB free space (more for production data)
-- **PostgreSQL:** Version 12+ (15-17 recommended)
-- **TimescaleDB:** Version 2.0+ (2.13+ recommended)
+- **PostgreSQL:** Version 13+ (15-18 supported, 17+ recommended)
+- **TimescaleDB:** Version 2.0+ (2.24+ recommended)
 
 ### Recommended Production Requirements
 - **OS:** Windows Server 2019/2022
@@ -49,15 +49,21 @@ This guide covers installing PostgreSQL and TimescaleDB on Windows Server for us
 
 1. Open web browser
 2. Navigate to: https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
-3. Select your PostgreSQL version (recommend 15 or 17)
+3. Select your PostgreSQL version (recommend 17 or 18)
 4. Select **Windows x86-64** platform
 5. Click **Download**
 
-**Recommended Version:** PostgreSQL 15.x or 17.x (stable releases)
+**Recommended Version:** PostgreSQL 17.x or 18.x (stable releases)
+
+**Note:** As of December 2025, the latest versions are:
+- PostgreSQL 18.1
+- PostgreSQL 17.7
+- PostgreSQL 16.11
+- PostgreSQL 15.15
 
 ### Step 2: Download TimescaleDB
 
-TimescaleDB will be installed after PostgreSQL using the Timescale installer.
+TimescaleDB will be installed after PostgreSQL using downloaded installer packages.
 
 ---
 
@@ -85,7 +91,7 @@ Click **Next**
 **Ensure these are checked:**
 - ✅ PostgreSQL Server
 - ✅ pgAdmin 4
-- ✅ Stack Builder (needed for TimescaleDB)
+- ✅ Stack Builder (optional but helpful)
 - ✅ Command Line Tools
 
 Click **Next**
@@ -135,27 +141,39 @@ Click **Next**
 1. Review installation summary
 2. Click **Next** to begin installation
 3. Wait for installation to complete (5-10 minutes)
-4. ✅ **Uncheck** "Launch Stack Builder at exit" (we'll use Timescale installer instead)
+4. ✅ Uncheck "Launch Stack Builder at exit"
 5. Click **Finish**
 
 ---
 
 ## Install TimescaleDB
 
-### Step 1: Download Timescale Installer
+### Step 1: Download TimescaleDB Installer
 
-1. Open web browser
-2. Navigate to: https://docs.timescale.com/self-hosted/latest/install/installation-windows/
-3. Download the **Timescale PostgreSQL installer** for your PostgreSQL version
-4. Or visit: https://www.timescale.com/download
+**Option 1: From TimescaleDB GitHub Releases**
 
-### Step 2: Run Timescale Installer
+1. Navigate to: https://github.com/timescale/timescaledb/releases
+2. Find the latest release (2.24.0 or newer)
+3. Download the appropriate installer for your PostgreSQL version:
+   - For PostgreSQL 18: `timescaledb-postgresql-18-windows-amd64.zip`
+   - For PostgreSQL 17: `timescaledb-postgresql-17-windows-amd64.zip`
+   - For PostgreSQL 16: `timescaledb-postgresql-16-windows-amd64.zip`
+   - For PostgreSQL 15: `timescaledb-postgresql-15-windows-amd64.zip`
 
-1. Locate downloaded file (e.g., `timescaledb-postgresql-17-windows-amd64.exe`)
-2. Right-click → **Run as Administrator**
-3. Follow installation wizard
-4. Select your PostgreSQL installation directory
-5. Click **Install**
+**Direct links for TimescaleDB 2.24.0:**
+- PostgreSQL 18: https://github.com/timescale/timescaledb/releases/download/2.24.0/timescaledb-postgresql-18-windows-amd64.zip
+- PostgreSQL 17: https://github.com/timescale/timescaledb/releases/download/2.24.0/timescaledb-postgresql-17-windows-amd64.zip
+- PostgreSQL 16: https://github.com/timescale/timescaledb/releases/download/2.24.0/timescaledb-postgresql-16-windows-amd64.zip
+- PostgreSQL 15: https://github.com/timescale/timescaledb/releases/download/2.24.0/timescaledb-postgresql-15-windows-amd64.zip
+
+### Step 2: Extract and Run TimescaleDB Installer
+
+1. Extract the downloaded ZIP file to a temporary folder
+2. Navigate into the extracted folder (e.g., `timescaledb`)
+3. Right-click `setup.exe` → **Run as Administrator**
+4. Complete the installation wizard
+5. Select your PostgreSQL installation directory when prompted
+6. Click **Install**
 
 ### Step 3: Update PostgreSQL Configuration
 
@@ -301,7 +319,7 @@ sc query postgresql-x64-17
 SELECT version();
 ```
 
-**Expected output:** PostgreSQL version information
+**Expected output:** PostgreSQL version information (e.g., PostgreSQL 17.7 or 18.1)
 
 ### Step 4: Check TimescaleDB Installation
 
@@ -311,7 +329,7 @@ FROM pg_available_extensions
 WHERE name = 'timescaledb';
 ```
 
-**Expected:** Version numbers displayed (e.g., 2.13.0)
+**Expected:** Version numbers displayed (e.g., 2.24.0)
 
 ### Step 5: Test TimescaleDB Extension
 
@@ -388,7 +406,7 @@ SHOW shared_preload_libraries;
 Should include `timescaledb`
 
 **2. Reinstall TimescaleDB**
-- Download Timescale installer again
+- Download TimescaleDB installer again
 - Run as Administrator
 - Select correct PostgreSQL installation
 
@@ -416,23 +434,34 @@ net start postgresql-x64-17
 netstat -ano | findstr :5432
 ```
 
-Should show `0.0.0.0:5432` or `*:5432`
+Should show `0.0.0.0:5432` or `*:5432` (not just `127.0.0.1:5432`)
 
-**2. Verify pg_hba.conf**
+**2. Verify listen_addresses**
+
+```cmd
+findstr listen_addresses "C:\Program Files\PostgreSQL\17\data\postgresql.conf"
+```
+
+**Should show:**
+```ini
+listen_addresses = '*'
+```
+
+**3. Verify pg_hba.conf**
 
 Ensure you have the correct entry for Ignition's IP:
 ```
 host    all    all    192.168.1.100/32    scram-sha-256
 ```
 
-**3. Check Firewall**
+**4. Check Firewall**
 ```powershell
 Get-NetFirewallRule -DisplayName "PostgreSQL"
 ```
 
 Should show rule as **Enabled**
 
-**4. Test from Ignition Server**
+**5. Test from Ignition Server**
 
 Using PowerShell on Ignition server:
 ```powershell
@@ -536,7 +565,8 @@ net start postgresql-x64-17
 ## Additional Resources
 
 - [PostgreSQL Windows Documentation](https://www.postgresql.org/docs/current/install-windows.html)
-- [TimescaleDB Windows Installation](https://docs.timescale.com/self-hosted/latest/install/installation-windows/)
+- [TimescaleDB GitHub Releases](https://github.com/timescale/timescaledb/releases)
+- [TimescaleDB Documentation](https://www.tigerdata.com/docs/)
 - [PostgreSQL Windows Tuning](https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server)
 
 ---

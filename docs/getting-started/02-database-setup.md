@@ -228,7 +228,7 @@ Expected output:
 ```
  extversion
 ------------
- 2.13.0
+ 2.24.0
 ```
 
 ### Test Write Permissions
@@ -425,7 +425,7 @@ ALTER DATABASE historian CONNECTION LIMIT 100;
 ## Additional Resources
 
 - [PostgreSQL Database Roles](https://www.postgresql.org/docs/current/user-manag.html)
-- [TimescaleDB Getting Started](https://docs.timescale.com/getting-started/latest/)
+- [TimescaleDB Getting Started](https://www.tigerdata.com/docs/getting-started/latest/)
 - [PostgreSQL Security Best Practices](https://www.postgresql.org/docs/current/auth-pg-hba-conf.html)
 
 **Last Updated:** December 7, 2025

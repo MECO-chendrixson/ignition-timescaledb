@@ -2,7 +2,7 @@
 
 **Estimated Time:** 20-30 minutes  
 **Difficulty:** Beginner to Intermediate  
-**Prerequisites:** Databases created and Ignition 8.3.2+ installed
+**Prerequisites:** Databases created and Ignition 8.3.0+ installed
 
 ## Overview
 

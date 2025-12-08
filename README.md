@@ -2,7 +2,7 @@
 
 **Version:** 1.3.0  
 **Last Updated:** December 8, 2025  
-**Compatible with:** Ignition 8.1+ and 8.3+, TimescaleDB 2.x, Windows Server 2016+, Ubuntu 20.04+
+**Compatible with:** Ignition 8.1+ (LTS) and 8.3+ (Current LTS), TimescaleDB 2.24+, Windows Server 2016+, Ubuntu 20.04+
 
 ## Overview
 
@@ -93,23 +93,23 @@ This documentation provides comprehensive guidance for integrating TimescaleDB w
 
 ### Additional Resources
 - [Official Ignition Documentation](https://docs.inductiveautomation.com/docs/8.3/intro)
-- [TimescaleDB Documentation](https://docs.timescale.com/)
+- [TimescaleDB Documentation](https://www.tigerdata.com/docs/)
 - [Community Forum Discussions](https://forum.inductiveautomation.com/t/timeseries-db-for-postgresql/21770)
 - [GitHub Examples](https://github.com/aRaymo/Using-TimeScaleDB-with-Ignition)
 
 ## System Requirements
 
 ### Minimum Requirements
-- **Ignition:** Version 8.3.2 or higher
+- **Ignition:** Version 8.3.0 or higher (8.3 is current LTS)
 - **PostgreSQL:** Version 12 or higher
-- **TimescaleDB:** Version 2.0 or higher
+- **TimescaleDB:** Version 2.0 or higher (2.24+ recommended)
 - **RAM:** 4GB minimum (8GB+ recommended)
 - **Storage:** Depends on data volume and retention period
 
 ### Recommended Requirements
 - **Ignition:** Version 8.3.x (latest)
-- **PostgreSQL:** Version 15 or higher
-- **TimescaleDB:** Version 2.13+ (latest stable)
+- **PostgreSQL:** Version 13 or higher (15-18 supported, 17+ recommended)
+- **TimescaleDB:** Version 2.24+ (latest stable)
 - **RAM:** 16GB+ for production systems
 - **Storage:** SSD for database storage
 - **Network:** Low-latency connection between Ignition and database
@@ -122,8 +122,8 @@ This documentation provides comprehensive guidance for integrating TimescaleDB w
 - Consult [TimescaleDB Community](https://timescale.com/community)
 
 ### Project Status
-- ✅ Production-ready for Ignition 8.3.2+
-- ✅ Tested with TimescaleDB 2.13+
+- ✅ Production-ready for Ignition 8.3.0+ (LTS)
+- ✅ Tested with TimescaleDB 2.24+
 - ✅ PostgreSQL 15+ support verified
 - 🔄 Continuous updates based on community feedback
 

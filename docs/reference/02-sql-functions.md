@@ -248,7 +248,7 @@ FROM sqlth_1_data;
 
 ## Additional Resources
 
-- [TimescaleDB Functions](https://docs.timescale.com/api/latest/)
+- [TimescaleDB Functions](https://www.tigerdata.com/docs/api/latest/)
 - [PostgreSQL Functions](https://www.postgresql.org/docs/current/functions.html)
 
 ---

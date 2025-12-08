@@ -93,7 +93,7 @@ psql (PostgreSQL) 17.x
 
 #### Step 1: Download TimescaleDB
 
-1. Visit [TimescaleDB Downloads](https://www.timescale.com/download)
+1. Visit [TimescaleDB GitHub Releases](https://github.com/timescale/timescaledb/releases)
 2. Select **Self-hosted** → **Windows**
 3. Download the installer for your PostgreSQL version
 
@@ -136,7 +136,7 @@ Enter the postgres password when prompted. Expected output:
 ```
  default_version
 -----------------
- 2.13.0
+ 2.24.0
 ```
 
 ---
@@ -227,7 +227,7 @@ Expected output:
 ```
  default_version
 -----------------
- 2.13.0
+ 2.24.0
 ```
 
 ---
@@ -505,7 +505,7 @@ ALTER DATABASE historian OWNER TO ignition;
 ## Additional Resources
 
 - [PostgreSQL Official Documentation](https://www.postgresql.org/docs/)
-- [TimescaleDB Documentation](https://docs.timescale.com/)
+- [TimescaleDB Documentation](https://www.tigerdata.com/docs/)
 - [PostgreSQL Wiki - Installation](https://wiki.postgresql.org/wiki/Detailed_installation_guides)
 
 **Last Updated:** December 7, 2025

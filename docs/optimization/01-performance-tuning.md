@@ -270,7 +270,7 @@ effective_io_concurrency = 200
 - SSDs: Random and sequential access nearly equal speed
 - Lower value encourages index usage
 
-### JIT Compilation (PostgreSQL 12+)
+### JIT Compilation (PostgreSQL 13+)
 
 ```conf
 # Enable JIT for complex queries
@@ -741,7 +741,7 @@ perfmon (monitor Disk I/O)
 ## Additional Resources
 
 - [PostgreSQL Performance Tuning](https://wiki.postgresql.org/wiki/Performance_Optimization)
-- [TimescaleDB Performance](https://docs.timescale.com/use-timescale/latest/performance/)
+- [TimescaleDB Performance](https://www.tigerdata.com/docs/use-timescale/latest/performance/)
 - [pgtune Configuration Generator](https://pgtune.leopard.in.ua/)
 
 ---

@@ -4,7 +4,7 @@
 -- Description: Creates databases and users for Ignition SCADA integration
 -- Version: 1.3.0
 -- Last Updated: 2025-12-08
--- Compatible with: PostgreSQL 12+, TimescaleDB 2.0+
+-- Compatible with: PostgreSQL 13+, TimescaleDB 2.0+ (2.24+ recommended)
 -- Maintained by: Miller-Eads Automation
 -- ============================================================================
 
