@@ -31,7 +31,7 @@ WHERE tagid = 100 AND t_stamp >= NOW() - INTERVAL '1 year';
 ```sql
 -- Query pre-aggregated daily data: 365 rows per tag
 SELECT AVG(avg_value) FROM tag_history_1day
-WHERE tagid = 100 AND bucket >= NOW() - INTERVAL '1 year';
+WHERE tagid = 100 AND bucket >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '1 year') * 1000)::BIGINT;
 -- Execution time: <100ms (50-300x faster)
 ```
 
@@ -512,7 +512,7 @@ SELECT
     min_value
 FROM tag_history_1hour_named
 WHERE tagpath = :tagPath
-  AND bucket >= CURRENT_TIMESTAMP - INTERVAL '30 days'
+  AND bucket >= (EXTRACT(EPOCH FROM CURRENT_TIMESTAMP - INTERVAL '30 days') * 1000)::BIGINT
 ORDER BY bucket DESC
 ```
 
@@ -665,7 +665,7 @@ GROUP BY tagid;
 EXPLAIN ANALYZE
 SELECT tagid, AVG(avg_value)
 FROM tag_history_1hour
-WHERE bucket >= NOW() - INTERVAL '30 days'
+WHERE bucket >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '30 days') * 1000)::BIGINT
 GROUP BY tagid;
 ```
 
@@ -683,7 +683,7 @@ SELECT
     min_value
 FROM tag_history_1hour_named
 WHERE tagpath LIKE '%Temperature%'
-  AND bucket >= NOW() - INTERVAL '7 days'
+  AND bucket >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '7 days') * 1000)::BIGINT
 ORDER BY bucket DESC
 LIMIT 100;
 ```
@@ -739,14 +739,15 @@ WITH time_series AS (
         tagid
     FROM tag_history_1hour
     WHERE tagid = 100  -- Check specific tag
-      AND bucket >= NOW() - INTERVAL '7 days'
+      AND bucket >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '7 days') * 1000)::BIGINT
 )
 SELECT 
     bucket,
     prev_bucket,
-    bucket - prev_bucket as gap_duration
+    bucket - prev_bucket as gap_ms,
+    (bucket - prev_bucket) / 3600000.0 as gap_hours
 FROM time_series
-WHERE bucket - prev_bucket > INTERVAL '1 hour'  -- Detect gaps
+WHERE bucket - prev_bucket > 3600000  -- Detect gaps > 1 hour (in milliseconds)
 ORDER BY bucket DESC;
 ```
 
@@ -1014,7 +1015,7 @@ SELECT
 FROM tag_history_1min_named
 WHERE tagpath IN ('[default]Production/Temperature', 
                   '[default]Production/Pressure')
-  AND bucket >= NOW() - INTERVAL '24 hours'
+  AND bucket >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '24 hours') * 1000)::BIGINT
 ORDER BY bucket DESC;
 ```
 
@@ -1032,8 +1033,8 @@ SELECT
     total_samples as data_points
 FROM tag_history_1day_named
 WHERE tagpath LIKE '%Production%'
-  AND bucket >= DATE_TRUNC('month', NOW() - INTERVAL '1 month')
-  AND bucket < DATE_TRUNC('month', NOW())
+  AND bucket >= (EXTRACT(EPOCH FROM DATE_TRUNC('month', NOW() - INTERVAL '1 month')) * 1000)::BIGINT
+  AND bucket < (EXTRACT(EPOCH FROM DATE_TRUNC('month', NOW())) * 1000)::BIGINT
 ORDER BY tagpath, report_date;
 ```
 
@@ -1048,7 +1049,7 @@ SELECT
     AVG(avg_value) as monthly_average
 FROM tag_history_1day_named
 WHERE tagpath = '[default]Production/Temperature'
-  AND bucket >= NOW() - INTERVAL '5 years'
+  AND bucket >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '5 years') * 1000)::BIGINT
 GROUP BY DATE_TRUNC('month', bucket), tagpath
 ORDER BY month;
 ```
@@ -1065,7 +1066,7 @@ SELECT
     total_good_samples,
     ROUND(100.0 * total_good_samples / NULLIF(total_samples, 0), 2) as quality_percent
 FROM tag_history_1day_named
-WHERE bucket >= NOW() - INTERVAL '30 days'
+WHERE bucket >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '30 days') * 1000)::BIGINT
   AND tagpath LIKE '%Critical%'
 ORDER BY quality_percent ASC
 LIMIT 20;  -- Show worst quality tags
@@ -1093,18 +1094,18 @@ LIMIT 20;  -- Show worst quality tags
 ### Common Commands
 
 ```sql
--- Create continuous aggregate
+-- Create continuous aggregate (for BIGINT time columns, use integer milliseconds)
 CREATE MATERIALIZED VIEW view_name
 WITH (timescaledb.continuous) AS
-SELECT time_bucket('interval', time_column), ...
+SELECT time_bucket(<milliseconds>, time_column), ...
 FROM source_table
-GROUP BY time_bucket('interval', time_column);
+GROUP BY time_bucket(<milliseconds>, time_column);
 
--- Add refresh policy
+-- Add refresh policy (for BIGINT time columns)
 SELECT add_continuous_aggregate_policy('view_name',
-    start_offset => INTERVAL 'X',
-    end_offset => INTERVAL 'Y',
-    schedule_interval => INTERVAL 'Z'
+    start_offset => <milliseconds>,    -- INTEGER for BIGINT time columns
+    end_offset => <milliseconds>,      -- INTEGER for BIGINT time columns
+    schedule_interval => INTERVAL 'Z'  -- INTERVAL for wall-clock scheduling
 );
 
 -- Manual refresh
@@ -1123,16 +1124,16 @@ SELECT * FROM timescaledb_information.continuous_aggregates;
 ### Time Bucket Examples
 
 ```sql
--- Various time bucket sizes
-time_bucket('1 second', t_stamp)
-time_bucket(10000, t_stamp)
-time_bucket(60000, t_stamp)
-time_bucket('5 minutes', t_stamp)
-time_bucket('15 minutes', t_stamp)
-time_bucket(3600000, t_stamp)
-time_bucket(86400000, t_stamp)
-time_bucket(604800000, t_stamp)
-time_bucket(2592000000, t_stamp)
+-- Various time bucket sizes (for BIGINT time columns, use integer milliseconds)
+time_bucket(1000, t_stamp)       -- 1 second
+time_bucket(10000, t_stamp)      -- 10 seconds
+time_bucket(60000, t_stamp)      -- 1 minute
+time_bucket(300000, t_stamp)     -- 5 minutes
+time_bucket(900000, t_stamp)     -- 15 minutes
+time_bucket(3600000, t_stamp)    -- 1 hour
+time_bucket(86400000, t_stamp)   -- 1 day
+time_bucket(604800000, t_stamp)  -- 1 week
+time_bucket(2592000000, t_stamp) -- 30 days (approx 1 month)
 ```
 
 ### Additional Resources
