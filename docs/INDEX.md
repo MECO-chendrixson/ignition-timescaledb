@@ -16,6 +16,7 @@ Complete index of all documentation for Ignition + TimescaleDB integration.
 | Document | Description | Difficulty |
 |----------|-------------|------------|
 | [Quick Start Guide](getting-started/00-quick-start.md) | Fast-track setup (30 min) | Intermediate |
+| [Quick Reference](getting-started/04-quick-reference.md) | **NEW!** Copy-paste commands for 8.1 & 8.3 | All Levels |
 | [Installation Guide](getting-started/01-installation.md) | PostgreSQL & TimescaleDB install | Beginner |
 | [Database Setup](getting-started/02-database-setup.md) | Create databases and users | Beginner |
 | [Ignition Configuration](getting-started/03-ignition-configuration.md) | Configure Ignition historian | Intermediate |
@@ -144,5 +145,5 @@ Status: Pending
 
 ---
 
-**Last Updated:** December 7, 2025  
-**Version:** 1.0
+**Last Updated:** December 8, 2025  
+**Version:** 1.2.0

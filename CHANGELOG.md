@@ -72,6 +72,33 @@ All notable changes to this documentation project will be documented in this fil
 - Automatic backup creation
 - Data validation post-migration
 
+## [1.2.0] - 2025-12-08
+
+### Added
+
+- **Quick Reference Guide** - Copy-paste command reference for rapid deployment
+- **Ignition 8.1 Support** - Documentation now covers both 8.1 and 8.3 configuration paths
+- **Version Comparison Table** - Side-by-side comparison of 8.1 vs 8.3 navigation paths
+- **Connection URL Examples** - Complete examples for local, remote, SSL, and custom port scenarios
+- **Common Pitfalls Section** - Guide to avoid common configuration mistakes
+- **Essential Configuration Checklist** - Must-do items for proper setup
+- **Security Checklist** - Production security best practices
+
+### Documentation
+
+- Quick reference with all setup commands in one place
+- Version-specific configuration instructions
+- Command reference for Windows and Linux
+- Verification commands for each setup stage
+- Links to detailed documentation for each section
+
+### Changed
+
+- Updated README.md to highlight Quick Reference guide
+- Updated INDEX.md to include Quick Reference document
+- Corrected author name from Chris to Charlie Hendrixson in PROJECT_SUMMARY.md
+- Updated version to 1.2.0 across documentation
+
 ## [Unreleased]
 
 ### Planned
