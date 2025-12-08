@@ -150,4 +150,8 @@ All notable changes to this documentation project will be documented in this fil
 
 ---
 
+**Maintained by:** Miller-Eads Automation  
+**Last Updated:** December 8, 2025  
+**Version:** 1.3.0
+
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)

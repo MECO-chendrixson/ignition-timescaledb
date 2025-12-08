@@ -1,7 +1,7 @@
 # Project Summary: Ignition + TimescaleDB Integration Documentation
 
 **Created:** December 7, 2025  
-**Version:** 1.2.0  
+**Version:** 1.3.0  
 **Status:** Published to forge.hpowr.com
 
 ## Overview
@@ -195,12 +195,12 @@ ignition-timescaledb/
 - Idempotent (safe to re-run)
 - Production-tested configurations
 
-### Code Statistics (v1.1.0)
-- **Total Lines:** ~6,200
-- **Documentation Files:** 14
+### Code Statistics (v1.3.0)
+- **Total Lines:** ~10,200+
+- **Documentation Files:** 24+
 - **SQL Scripts:** 3
 - **Python Scripts:** 1
-- **Markdown Files:** 14
+- **Markdown Files:** 24+
 - **Configuration Files:** 3
 
 ## Git Repository Status
@@ -209,13 +209,25 @@ ignition-timescaledb/
 Repository: Published to forge.hpowr.com
 Branch: main
 Remote: https://forge.hpowr.com/chendrixson/ignition-timescaledb.git
-Status: v1.1.0 committed and pushed
+Status: v1.3.0 committed and pushed
 
 Commit History:
 1. Initial documentation (v1.0.0)
 2. Add ML integration and migration docs (v1.1.0)
-3. Update README and PROJECT_SUMMARY to v1.1.0
+3. Add Quick Reference and Ignition 8.1 support (v1.2.0)
+4. Add platform-specific guides for Windows and Linux (v1.3.0)
+5. Update metadata and maintainer information
 ```
+
+## v1.3.0 New Features
+
+### Platform-Specific Documentation
+- ✅ Separate installation guides for Windows Server and Linux
+- ✅ Platform-specific database setup instructions
+- ✅ Platform Selector landing page
+- ✅ OS-specific troubleshooting sections
+- ✅ Windows: Task Scheduler, Windows Firewall, GUI tools
+- ✅ Linux: cron, UFW/firewalld, systemctl commands
 
 ## v1.1.0 New Features
 
@@ -316,4 +328,4 @@ Based on research from:
 **Repository:** https://forge.hpowr.com/chendrixson/ignition-timescaledb  
 **Maintained By:** Miller-Eads Automation  
 **Last Updated:** December 8, 2025  
-**Version:** 1.2.0
+**Version:** 1.3.0
