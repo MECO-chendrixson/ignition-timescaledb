@@ -431,7 +431,7 @@ ALTER USER ignition PASSWORD 'new_password';
 2. **Manually compress old chunks:**
    ```sql
    SELECT compress_chunk(i, if_not_compressed => true)
-   FROM show_chunks('sqlth_1_data', older_than => INTERVAL '7 days') i;
+   FROM show_chunks('sqlth_1_data', older_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '7 days') * 1000)::BIGINT) i;
    ```
 
 3. **Configure retention policy:**

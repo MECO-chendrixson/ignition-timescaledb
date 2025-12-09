@@ -81,13 +81,16 @@ GROUP BY tagid;
 
 Manually compress a chunk.
 
+**Important:** Since Ignition uses BIGINT millisecond timestamps, you must convert time intervals to milliseconds.
+
 ```sql
 -- Compress specific chunk
 SELECT compress_chunk('_timescaledb_internal._hyper_1_1_chunk');
 
--- Compress all eligible chunks
+-- Compress all chunks older than 7 days (using millisecond calculation)
 SELECT compress_chunk(chunk) 
-FROM show_chunks('sqlth_1_data', older_than => INTERVAL '7 days') chunk;
+FROM show_chunks('sqlth_1_data', 
+    older_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '7 days') * 1000)::BIGINT) chunk;
 ```
 
 ### decompress_chunk()
@@ -106,26 +109,49 @@ SELECT decompress_chunk('_timescaledb_internal._hyper_1_1_chunk');
 
 List chunks for a hypertable.
 
+**Important:** For BIGINT timestamps (Ignition), use explicit millisecond values, not INTERVAL.
+
 ```sql
 -- All chunks
 SELECT show_chunks('sqlth_1_data');
 
+-- Chunks older than 30 days (correct for BIGINT timestamps)
+SELECT show_chunks('sqlth_1_data',
+    older_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '30 days') * 1000)::BIGINT);
+
 -- Chunks in time range
 SELECT show_chunks('sqlth_1_data',
-    older_than => NOW() - INTERVAL '30 days',
-    newer_than => NOW() - INTERVAL '60 days');
+    older_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '30 days') * 1000)::BIGINT,
+    newer_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '60 days') * 1000)::BIGINT);
 ```
 
 ### drop_chunks()
 
 Delete old chunks.
 
+**Important:** For BIGINT timestamps, calculate milliseconds explicitly.
+
 ```sql
--- Drop chunks older than 10 years
-SELECT drop_chunks('sqlth_1_data', older_than => INTERVAL '10 years');
+-- Drop chunks older than 10 years (correct for BIGINT millisecond timestamps)
+SELECT drop_chunks('sqlth_1_data', 
+    older_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '10 years') * 1000)::BIGINT);
 
 -- Preview what would be dropped
-SELECT * FROM show_chunks('sqlth_1_data', older_than => INTERVAL '10 years');
+SELECT * FROM show_chunks('sqlth_1_data', 
+    older_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '10 years') * 1000)::BIGINT);
+
+-- Drop by explicit timestamp (milliseconds since epoch)
+-- Example: Drop chunks before January 1, 2020
+SELECT drop_chunks('sqlth_1_data', older_than => 1577836800000);
+```
+
+**Common Time Conversions:**
+```sql
+-- 1 hour in milliseconds: 3600000
+-- 1 day in milliseconds: 86400000
+-- 1 week in milliseconds: 604800000
+-- 30 days in milliseconds: 2592000000
+-- 1 year in milliseconds: 31536000000
 ```
 
 ---
@@ -246,6 +272,34 @@ FROM sqlth_1_data;
 
 ---
 
+## Important Notes for Ignition Integration
+
+### BIGINT Timestamp Handling
+
+Ignition's historian uses BIGINT for `t_stamp` (milliseconds since Unix epoch), not PostgreSQL TIMESTAMP types. This means:
+
+1. **Cannot use INTERVAL directly** with `show_chunks()`, `drop_chunks()`, or time comparisons
+2. **Must convert INTERVAL to milliseconds** using `EXTRACT(EPOCH FROM ...) * 1000`
+3. **Can use direct millisecond values** for absolute time specifications
+
+**Incorrect (will cause errors):**
+```sql
+-- ❌ WRONG - INTERVAL doesn't work with BIGINT
+SELECT drop_chunks('sqlth_1_data', older_than => INTERVAL '7 days');
+```
+
+**Correct:**
+```sql
+-- ✅ CORRECT - Convert to milliseconds
+SELECT drop_chunks('sqlth_1_data', 
+    older_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '7 days') * 1000)::BIGINT);
+
+-- ✅ CORRECT - Use explicit millisecond value
+SELECT drop_chunks('sqlth_1_data', older_than => 604800000); -- 7 days
+```
+
+---
+
 ## Additional Resources
 
 - [TimescaleDB Functions](https://www.tigerdata.com/docs/api/latest/)
@@ -254,4 +308,4 @@ FROM sqlth_1_data;
 ---
 
 **Last Updated:** December 8, 2025  
-**Version:** 1.3.0
+**Version:** 1.3.1

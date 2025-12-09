@@ -653,7 +653,7 @@ SELECT * FROM timescaledb_information.compressed_chunk_stats;
 
 -- Manually compress if needed
 SELECT compress_chunk(i, if_not_compressed => true)
-FROM show_chunks('sqlth_1_data', older_than => INTERVAL '7 days') i;
+FROM show_chunks('sqlth_1_data', older_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '7 days') * 1000)::BIGINT) i;
 ```
 
 ### 3. Test Queries
