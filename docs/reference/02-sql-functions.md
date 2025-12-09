@@ -7,6 +7,8 @@
 
 Comprehensive reference for SQL functions used with TimescaleDB and Ignition historian queries.
 
+**Important:** Ignition's historian uses BIGINT for `t_stamp` (milliseconds since Unix epoch). All time-based queries must use millisecond values or convert INTERVAL to milliseconds.
+
 ---
 
 ## TimescaleDB Time-Series Functions
@@ -17,27 +19,34 @@ Group time-series data into buckets.
 
 **Syntax:**
 ```sql
-time_bucket(bucket_width INTERVAL, timestamp TIMESTAMP)
 time_bucket(bucket_width BIGINT, timestamp BIGINT)
 ```
 
 **Examples:**
 ```sql
--- Hourly buckets (milliseconds)
+-- Hourly buckets (3600000 milliseconds = 1 hour)
 SELECT time_bucket(3600000, t_stamp) as hour, AVG(floatvalue)
 FROM sqlth_1_data
 GROUP BY hour;
 
--- Daily buckets
+-- Daily buckets (86400000 milliseconds = 1 day)
 SELECT time_bucket(86400000, t_stamp) as day, AVG(floatvalue)
 FROM sqlth_1_data
 GROUP BY day;
 
--- 15-minute buckets
+-- 15-minute buckets (900000 milliseconds = 15 minutes)
 SELECT time_bucket(900000, t_stamp) as bucket, COUNT(*)
 FROM sqlth_1_data
 GROUP BY bucket;
 ```
+
+**Common Time Bucket Intervals (milliseconds):**
+- 1 minute: `60000`
+- 5 minutes: `300000`
+- 15 minutes: `900000`
+- 1 hour: `3600000`
+- 1 day: `86400000`
+- 1 week: `604800000`
 
 ---
 
@@ -64,12 +73,13 @@ GROUP BY hour, tagid;
 Get first/last values in aggregation.
 
 ```sql
+-- Get first and last values for each tag in the last 24 hours
 SELECT 
     tagid,
     first(floatvalue, t_stamp) as first_value,
     last(floatvalue, t_stamp) as last_value
 FROM sqlth_1_data
-WHERE t_stamp >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '1 day') * 1000)
+WHERE t_stamp >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '1 day') * 1000)::BIGINT
 GROUP BY tagid;
 ```
 
@@ -81,21 +91,23 @@ GROUP BY tagid;
 
 Manually compress a chunk.
 
-**Important:** Since Ignition uses BIGINT millisecond timestamps, you must convert time intervals to milliseconds.
-
 ```sql
 -- Compress specific chunk
 SELECT compress_chunk('_timescaledb_internal._hyper_1_1_chunk');
 
--- Compress all chunks older than 7 days (using millisecond calculation)
+-- Compress all chunks older than 7 days
 SELECT compress_chunk(chunk) 
 FROM show_chunks('sqlth_1_data', 
     older_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '7 days') * 1000)::BIGINT) chunk;
+
+-- Compress all chunks older than specific date
+SELECT compress_chunk(chunk)
+FROM show_chunks('sqlth_1_data', older_than => 1704067200000) chunk; -- Jan 1, 2024
 ```
 
 ### decompress_chunk()
 
-Decompress for updates.
+Decompress a chunk for updates.
 
 ```sql
 SELECT decompress_chunk('_timescaledb_internal._hyper_1_1_chunk');
@@ -109,50 +121,69 @@ SELECT decompress_chunk('_timescaledb_internal._hyper_1_1_chunk');
 
 List chunks for a hypertable.
 
-**Important:** For BIGINT timestamps (Ignition), use explicit millisecond values, not INTERVAL.
-
 ```sql
 -- All chunks
 SELECT show_chunks('sqlth_1_data');
 
--- Chunks older than 30 days (correct for BIGINT timestamps)
+-- Chunks older than 30 days
 SELECT show_chunks('sqlth_1_data',
     older_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '30 days') * 1000)::BIGINT);
 
--- Chunks in time range
+-- Chunks in time range (between 30 and 60 days old)
 SELECT show_chunks('sqlth_1_data',
     older_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '30 days') * 1000)::BIGINT,
     newer_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '60 days') * 1000)::BIGINT);
+
+-- Chunks older than specific date (milliseconds)
+SELECT show_chunks('sqlth_1_data', older_than => 1704067200000); -- Jan 1, 2024
 ```
 
 ### drop_chunks()
 
-Delete old chunks.
-
-**Important:** For BIGINT timestamps, calculate milliseconds explicitly.
+Delete old chunks. **Use with caution - this permanently deletes data!**
 
 ```sql
--- Drop chunks older than 10 years (correct for BIGINT millisecond timestamps)
+-- Drop chunks older than 10 years
 SELECT drop_chunks('sqlth_1_data', 
     older_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '10 years') * 1000)::BIGINT);
 
--- Preview what would be dropped
+-- Preview what would be dropped (always check first!)
 SELECT * FROM show_chunks('sqlth_1_data', 
     older_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '10 years') * 1000)::BIGINT);
 
--- Drop by explicit timestamp (milliseconds since epoch)
--- Example: Drop chunks before January 1, 2020
-SELECT drop_chunks('sqlth_1_data', older_than => 1577836800000);
+-- Drop chunks before specific date
+SELECT drop_chunks('sqlth_1_data', older_than => 1577836800000); -- Jan 1, 2020
 ```
 
-**Common Time Conversions:**
+---
+
+## Retention and Compression Policies
+
+### add_compression_policy()
+
+Automatically compress chunks after a specified age.
+
 ```sql
--- 1 hour in milliseconds: 3600000
--- 1 day in milliseconds: 86400000
--- 1 week in milliseconds: 604800000
--- 30 days in milliseconds: 2592000000
--- 1 year in milliseconds: 31536000000
+-- Compress chunks older than 7 days
+SELECT add_compression_policy('sqlth_1_data', INTERVAL '7 days');
+
+-- Compress chunks older than 1 day
+SELECT add_compression_policy('sqlth_1_data', INTERVAL '1 day');
 ```
+
+### add_retention_policy()
+
+Automatically drop chunks after a specified age.
+
+```sql
+-- Drop chunks older than 10 years
+SELECT add_retention_policy('sqlth_1_data', INTERVAL '10 years');
+
+-- Drop chunks older than 1 year
+SELECT add_retention_policy('sqlth_1_data', INTERVAL '1 year');
+```
+
+**Note:** Policy functions accept INTERVAL directly because they operate on schedules, not direct timestamp comparisons.
 
 ---
 
@@ -163,6 +194,7 @@ SELECT drop_chunks('sqlth_1_data', older_than => 1577836800000);
 ```sql
 -- Statistical aggregates
 SELECT 
+    tagid,
     AVG(floatvalue) as average,
     STDDEV(floatvalue) as std_deviation,
     VARIANCE(floatvalue) as variance,
@@ -170,7 +202,9 @@ SELECT
     MAX(floatvalue) as maximum,
     SUM(floatvalue) as total,
     COUNT(*) as sample_count
-FROM sqlth_1_data;
+FROM sqlth_1_data
+WHERE t_stamp >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '24 hours') * 1000)::BIGINT
+GROUP BY tagid;
 ```
 
 ### PERCENTILE_CONT()
@@ -179,10 +213,13 @@ Calculate percentiles.
 
 ```sql
 SELECT 
+    tagid,
     PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY floatvalue) as median,
     PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY floatvalue) as p95,
     PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY floatvalue) as p99
-FROM sqlth_1_data;
+FROM sqlth_1_data
+WHERE t_stamp >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '7 days') * 1000)::BIGINT
+GROUP BY tagid;
 ```
 
 ---
@@ -196,7 +233,8 @@ SELECT
     t_stamp,
     floatvalue,
     ROW_NUMBER() OVER (PARTITION BY tagid ORDER BY t_stamp) as row_num
-FROM sqlth_1_data;
+FROM sqlth_1_data
+WHERE tagid = 100;
 ```
 
 ### LAG() and LEAD()
@@ -209,7 +247,9 @@ SELECT
     LEAD(floatvalue) OVER (ORDER BY t_stamp) as next_value,
     floatvalue - LAG(floatvalue) OVER (ORDER BY t_stamp) as delta
 FROM sqlth_1_data
-WHERE tagid = 100;
+WHERE tagid = 100
+  AND t_stamp >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '1 hour') * 1000)::BIGINT
+ORDER BY t_stamp;
 ```
 
 ---
@@ -224,19 +264,25 @@ SELECT
     t_stamp,
     EXTRACT(YEAR FROM to_timestamp(t_stamp/1000)) as year,
     EXTRACT(MONTH FROM to_timestamp(t_stamp/1000)) as month,
+    EXTRACT(DAY FROM to_timestamp(t_stamp/1000)) as day,
     EXTRACT(DOW FROM to_timestamp(t_stamp/1000)) as day_of_week,
     EXTRACT(HOUR FROM to_timestamp(t_stamp/1000)) as hour
-FROM sqlth_1_data;
+FROM sqlth_1_data
+LIMIT 100;
 ```
 
 ### DATE_TRUNC()
 
 ```sql
+-- Group by day
 SELECT 
     DATE_TRUNC('day', to_timestamp(t_stamp/1000)) as day,
-    COUNT(*)
+    COUNT(*) as record_count,
+    AVG(floatvalue) as avg_value
 FROM sqlth_1_data
-GROUP BY day;
+WHERE t_stamp >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '30 days') * 1000)::BIGINT
+GROUP BY day
+ORDER BY day;
 ```
 
 ---
@@ -247,12 +293,16 @@ GROUP BY day;
 
 ```sql
 -- Find tags by pattern
-SELECT tagpath FROM sqlth_te 
-WHERE tagpath LIKE '[default]Production/%';
+SELECT tagpath, tagid 
+FROM sqlth_te 
+WHERE tagpath LIKE '[default]Production/%'
+  AND retired IS NULL;
 
 -- Regular expression
-SELECT tagpath FROM sqlth_te
-WHERE tagpath ~ '\[default\]Production/Line[0-9]+/Temperature';
+SELECT tagpath, tagid
+FROM sqlth_te
+WHERE tagpath ~ '\[default\]Production/Line[0-9]+/Temperature'
+  AND retired IS NULL;
 ```
 
 ---
@@ -261,41 +311,63 @@ WHERE tagpath ~ '\[default\]Production/Line[0-9]+/Temperature';
 
 ```sql
 SELECT 
+    tagid,
+    t_stamp,
+    floatvalue,
     ROUND(floatvalue, 2) as rounded,
     CEIL(floatvalue) as ceiling,
     FLOOR(floatvalue) as floor,
     ABS(floatvalue) as absolute,
     POWER(floatvalue, 2) as squared,
-    SQRT(floatvalue) as square_root
-FROM sqlth_1_data;
+    SQRT(ABS(floatvalue)) as square_root
+FROM sqlth_1_data
+WHERE tagid = 100
+  AND t_stamp >= (EXTRACT(EPOCH FROM NOW() - INTERVAL '1 hour') * 1000)::BIGINT
+LIMIT 100;
 ```
 
 ---
 
-## Important Notes for Ignition Integration
+## Working with Millisecond Timestamps
 
-### BIGINT Timestamp Handling
+### Converting INTERVAL to Milliseconds
 
-Ignition's historian uses BIGINT for `t_stamp` (milliseconds since Unix epoch), not PostgreSQL TIMESTAMP types. This means:
+When using `show_chunks()`, `drop_chunks()`, or time comparisons, convert INTERVAL to milliseconds:
 
-1. **Cannot use INTERVAL directly** with `show_chunks()`, `drop_chunks()`, or time comparisons
-2. **Must convert INTERVAL to milliseconds** using `EXTRACT(EPOCH FROM ...) * 1000`
-3. **Can use direct millisecond values** for absolute time specifications
-
-**Incorrect (will cause errors):**
 ```sql
--- ❌ WRONG - INTERVAL doesn't work with BIGINT
-SELECT drop_chunks('sqlth_1_data', older_than => INTERVAL '7 days');
+-- Template
+(EXTRACT(EPOCH FROM NOW() - INTERVAL 'X units') * 1000)::BIGINT
+
+-- Examples
+(EXTRACT(EPOCH FROM NOW() - INTERVAL '1 hour') * 1000)::BIGINT
+(EXTRACT(EPOCH FROM NOW() - INTERVAL '7 days') * 1000)::BIGINT
+(EXTRACT(EPOCH FROM NOW() - INTERVAL '30 days') * 1000)::BIGINT
+(EXTRACT(EPOCH FROM NOW() - INTERVAL '1 year') * 1000)::BIGINT
+(EXTRACT(EPOCH FROM NOW() - INTERVAL '10 years') * 1000)::BIGINT
 ```
 
-**Correct:**
-```sql
--- ✅ CORRECT - Convert to milliseconds
-SELECT drop_chunks('sqlth_1_data', 
-    older_than => (EXTRACT(EPOCH FROM NOW() - INTERVAL '7 days') * 1000)::BIGINT);
+### Common Millisecond Values
 
--- ✅ CORRECT - Use explicit millisecond value
-SELECT drop_chunks('sqlth_1_data', older_than => 604800000); -- 7 days
+```sql
+-- 1 second = 1,000
+-- 1 minute = 60,000
+-- 1 hour = 3,600,000
+-- 1 day = 86,400,000
+-- 1 week = 604,800,000
+-- 30 days = 2,592,000,000
+-- 1 year (365 days) = 31,536,000,000
+-- 10 years = 315,360,000,000
+```
+
+### Converting Dates to Milliseconds
+
+```sql
+-- Convert specific date to milliseconds
+SELECT EXTRACT(EPOCH FROM '2024-01-01'::timestamp) * 1000; -- Result: 1704067200000
+
+-- Use in queries
+SELECT * FROM sqlth_1_data
+WHERE t_stamp >= 1704067200000; -- All data since Jan 1, 2024
 ```
 
 ---
@@ -304,8 +376,10 @@ SELECT drop_chunks('sqlth_1_data', older_than => 604800000); -- 7 days
 
 - [TimescaleDB Functions](https://www.tigerdata.com/docs/api/latest/)
 - [PostgreSQL Functions](https://www.postgresql.org/docs/current/functions.html)
+- [TimescaleDB Compression](https://www.tigerdata.com/docs/use-timescale/latest/compression/)
+- [TimescaleDB Data Retention](https://www.tigerdata.com/docs/use-timescale/latest/data-retention/)
 
 ---
 
 **Last Updated:** December 8, 2025  
-**Version:** 1.3.1
+**Version:** 1.3.2
